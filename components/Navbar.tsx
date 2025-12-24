@@ -1,6 +1,6 @@
 
-import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Search, User, Heart, ShoppingCart, Menu, ArrowRight, Tag, X } from 'lucide-react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { ALL_PRODUCTS, CATEGORIES } from '../constants';
 import { supabase } from '../supabaseClient';
 
@@ -214,24 +214,29 @@ const Navbar: React.FC<NavbarProps> = ({
 
           {/* Icons */}
           <div className="flex items-center gap-2 md:gap-5">
+            {/* Search - Visible on mobile as requested */}
             <button 
               onClick={() => setIsMobileSearchOpen(true)}
               className="p-2 text-gray-700 hover:bg-gray-100 rounded-full transition-colors lg:hidden"
             >
               <Search className="w-5 h-5" />
             </button>
+            
+            {/* User - Hidden on mobile, moved to menu bar */}
             <button 
               onClick={() => onNavigate('auth')}
-              className={`p-2 rounded-full transition-colors relative ${currentView === 'auth' ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-100'}`}
+              className={`p-2 rounded-full transition-colors relative hidden md:block ${currentView === 'auth' ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-100'}`}
             >
               <User className={`w-5 h-5 ${isLoggedIn ? 'text-blue-600' : ''}`} />
               {isLoggedIn && (
                 <div className="absolute top-1 right-1 w-2 h-2 bg-blue-500 rounded-full border border-white shadow-sm"></div>
               )}
             </button>
+            
+            {/* Wishlist - Hidden on mobile, moved to menu bar */}
             <button 
               onClick={() => onNavigate('wishlist')}
-              className={`p-2 relative rounded-full transition-colors ${currentView === 'wishlist' ? 'bg-red-50 text-red-600' : 'text-gray-700 hover:bg-gray-100'}`}
+              className={`p-2 relative rounded-full transition-colors hidden md:block ${currentView === 'wishlist' ? 'bg-red-50 text-red-600' : 'text-gray-700 hover:bg-gray-100'}`}
             >
               <Heart className={`w-5 h-5 ${wishlistCount > 0 && currentView !== 'wishlist' ? 'animate-pulse text-red-500' : ''}`} />
               {wishlistCount > 0 && (
@@ -240,6 +245,8 @@ const Navbar: React.FC<NavbarProps> = ({
                 </div>
               )}
             </button>
+            
+            {/* Cart - Visible on mobile as requested */}
             <button 
               onClick={() => onNavigate('cart')}
               className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full transition-all shadow-md active:scale-95 group ${
@@ -254,6 +261,8 @@ const Navbar: React.FC<NavbarProps> = ({
                 {cartCount}
               </div>
             </button>
+            
+            {/* Menu (Hamburger) - The menu bar entry */}
             <button 
               onClick={() => setIsMobileMenuOpen(true)}
               className="p-2 text-gray-700 hover:bg-gray-100 rounded-full transition-colors md:hidden"
@@ -264,10 +273,10 @@ const Navbar: React.FC<NavbarProps> = ({
         </div>
       </nav>
 
-      {/* Mobile Drawer Navigation */}
+      {/* Mobile Drawer Navigation (The Menu Bar) */}
       <div className={`fixed inset-0 z-[100] transition-opacity duration-300 bg-black/60 backdrop-blur-sm ${isMobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-        <div className={`fixed right-0 top-0 bottom-0 w-[80%] max-w-sm bg-white shadow-2xl transition-transform duration-500 transform ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
-          <div className="p-6 flex flex-col h-full">
+        <div className={`fixed right-0 top-0 bottom-0 w-[85%] max-w-sm bg-white shadow-2xl transition-transform duration-500 transform ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+          <div className="p-6 flex flex-col h-full overflow-y-auto no-scrollbar">
             <div className="flex items-center justify-between mb-10">
               <div className="flex items-center gap-2">
                 <div className="bg-blue-600 p-2 rounded-lg">
@@ -280,8 +289,43 @@ const Navbar: React.FC<NavbarProps> = ({
               </button>
             </div>
 
+            {/* Account & Wishlist - Moved here for mobile */}
+            <div className="space-y-2 mb-8 md:hidden">
+              <div className="px-2 py-2 text-[10px] font-black text-gray-400 uppercase tracking-[0.3em]">Member Dashboard</div>
+              <button
+                onClick={() => { onNavigate('auth'); setIsMobileMenuOpen(false); }}
+                className={`w-full flex items-center justify-between px-4 py-4 rounded-2xl transition-all ${
+                  currentView === 'auth' ? 'bg-blue-50 text-blue-600' : 'bg-gray-50 text-slate-900'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <User className={`w-5 h-5 ${isLoggedIn ? 'text-blue-600' : ''}`} />
+                  <span className="font-black italic text-lg tracking-tight">My Profile</span>
+                </div>
+                <ArrowRight className="w-4 h-4 opacity-30" />
+              </button>
+              
+              <button
+                onClick={() => { onNavigate('wishlist'); setIsMobileMenuOpen(false); }}
+                className={`w-full flex items-center justify-between px-4 py-4 rounded-2xl transition-all ${
+                  currentView === 'wishlist' ? 'bg-red-50 text-red-600' : 'bg-gray-50 text-slate-900'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <Heart className={`w-5 h-5 ${wishlistCount > 0 ? 'text-red-500 fill-current' : ''}`} />
+                  <span className="font-black italic text-lg tracking-tight">Saved Items</span>
+                </div>
+                {wishlistCount > 0 && (
+                  <span className="bg-red-500 text-white text-[10px] font-black px-2 py-1 rounded-full">
+                    {wishlistCount}
+                  </span>
+                )}
+                {!wishlistCount && <ArrowRight className="w-4 h-4 opacity-30" />}
+              </button>
+            </div>
+
             <div className="flex-1 space-y-1">
-              <div className="px-2 py-4 text-[10px] font-black text-gray-400 uppercase tracking-[0.3em]">Curation Archive</div>
+              <div className="px-2 py-2 text-[10px] font-black text-gray-400 uppercase tracking-[0.3em]">Curation Archive</div>
               {navLinks.map((link) => (
                 <button
                   key={link.id}
