@@ -99,7 +99,7 @@ const Navbar: React.FC<NavbarProps> = ({
 
   return (
     <>
-      <nav className="sticky top-0 z-50 bg-white border-b border-gray-100 py-4 px-4 md:px-8">
+      <nav className="sticky top-0 z-50 bg-white py-4 px-4 md:px-8">
         <div className="max-w-7xl mx-auto px-1 flex items-center justify-between">
           {/* Logo */}
           <div 
@@ -214,7 +214,7 @@ const Navbar: React.FC<NavbarProps> = ({
 
           {/* Icons */}
           <div className="flex items-center gap-2 md:gap-5">
-            {/* Search - Visible on mobile as requested */}
+            {/* Search - Visible on mobile */}
             <button 
               onClick={() => setIsMobileSearchOpen(true)}
               className="p-2 text-gray-700 hover:bg-gray-100 rounded-full transition-colors lg:hidden"
@@ -246,7 +246,7 @@ const Navbar: React.FC<NavbarProps> = ({
               )}
             </button>
             
-            {/* Cart - Visible on mobile as requested */}
+            {/* Cart - Visible on mobile */}
             <button 
               onClick={() => onNavigate('cart')}
               className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full transition-all shadow-md active:scale-95 group ${
