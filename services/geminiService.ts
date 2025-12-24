@@ -1,9 +1,24 @@
-
 import { GoogleGenAI } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
+// Initialize lazily to prevent crash if API_KEY is not yet available in the environment
+let aiInstance: GoogleGenAI | null = null;
+
+const getAI = () => {
+  const apiKey = process.env.API_KEY;
+  if (!apiKey) {
+    console.warn("Gemini API Key is missing. Please set API_KEY in your environment variables.");
+    return null;
+  }
+  if (!aiInstance) {
+    aiInstance = new GoogleGenAI({ apiKey });
+  }
+  return aiInstance;
+};
 
 export const getStyleAdvice = async (userQuery: string) => {
+  const ai = getAI();
+  if (!ai) return "Stylist is currently offline. Please check back later.";
+
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
@@ -21,6 +36,9 @@ export const getStyleAdvice = async (userQuery: string) => {
 };
 
 export const getProductInsight = async (productName: string, category: string) => {
+  const ai = getAI();
+  if (!ai) return "A definitive silhouette designed for the modern rotation.";
+
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
@@ -37,6 +55,9 @@ export const getProductInsight = async (productName: string, category: string) =
 };
 
 export const getReviewSummary = async (productName: string, reviews: any[]) => {
+  const ai = getAI();
+  if (!ai) return "• High consumer satisfaction\n• Premium build quality\n• True to size";
+
   try {
     const reviewTexts = reviews.map(r => r.comment).join(" | ");
     const response = await ai.models.generateContent({
