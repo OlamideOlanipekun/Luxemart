@@ -6,13 +6,13 @@ export const CATEGORIES: Category[] = [
     id: 'men',
     name: 'Men',
     subtitle: 'New arrivals & trends',
-    image: 'https://images.unsplash.com/photo-1490578474895-699cd4e2cf59?auto=format&fit=crop&q=80&w=800'
+    image: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=800'
   },
   {
     id: 'women',
     name: 'Women',
     subtitle: 'Summer collection',
-    image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&q=80&w=800'
+    image: 'https://images.unsplash.com/photo-1578632292335-df3abbb0d586?auto=format&fit=crop&q=80&w=800'
   },
   {
     id: 'accessories',
