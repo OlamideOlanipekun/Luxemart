@@ -1,34 +1,72 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Tag, Timer, Flame, Sparkles, Copy, Check, ShoppingBag, Heart, Star, Eye, Plus } from 'lucide-react';
-import { ALL_PRODUCTS } from '../constants';
+import {  } from '../constants';
+import { Product } from '../types';
+import { api } from '../services/api';
 
 interface DealsPageProps {
+  products: Product[];
   wishlist: string[];
   onToggleWishlist: (id: string) => void;
   onAddToCart: (id: string) => void;
   onProductClick: (id: string) => void;
 }
 
-const DealsPage: React.FC<DealsPageProps> = ({ wishlist, onToggleWishlist, onAddToCart, onProductClick }) => {
+const DealsPage: React.FC<DealsPageProps> = ({ products, wishlist, onToggleWishlist, onAddToCart, onProductClick }) => {
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
-  const [timeLeft, setTimeLeft] = useState({ h: 14, m: 45, s: 0 });
+  const [timeLeft, setTimeLeft] = useState({ d: '00', h: '00', m: '00', s: '00' });
+  const [targetDate, setTargetDate] = useState<Date | null>(null);
 
   const dealProducts = useMemo(() => {
-    return ALL_PRODUCTS.filter(p => p.originalPrice && p.originalPrice > p.price);
-  }, []);
+    return products.filter(p => p.original_price && p.original_price > p.price);
+  }, [products]);
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft(prev => {
-        if (prev.s > 0) return { ...prev, s: prev.s - 1 };
-        if (prev.m > 0) return { ...prev, m: prev.m - 1, s: 59 };
-        if (prev.h > 0) return { h: prev.h - 1, m: 59, s: 59 };
-        return prev;
-      });
-    }, 1000);
-    return () => clearInterval(timer);
+    const fetchCountdown = async () => {
+      try {
+        const res = await api.products.getPublicSetting('countdown_end');
+        if (res && res.value_text) {
+          setTargetDate(new Date(res.value_text));
+        }
+      } catch (err) {
+        console.error("Failed to fetch deals countdown", err);
+      }
+    };
+    fetchCountdown();
   }, []);
+
+  const calculateTimeLeft = useCallback(() => {
+    if (!targetDate) return;
+
+    const now = new Date().getTime();
+    const target = targetDate.getTime();
+    const difference = target - now;
+
+    if (difference <= 0) {
+      setTimeLeft({ d: '00', h: '00', m: '00', s: '00' });
+      return;
+    }
+
+    const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+    setTimeLeft({
+      d: days.toString().padStart(2, '0'),
+      h: hours.toString().padStart(2, '0'),
+      m: minutes.toString().padStart(2, '0'),
+      s: seconds.toString().padStart(2, '0')
+    });
+  }, [targetDate]);
+
+  useEffect(() => {
+    if (!targetDate) return;
+    calculateTimeLeft();
+    const timer = setInterval(calculateTimeLeft, 1000);
+    return () => clearInterval(timer);
+  }, [targetDate, calculateTimeLeft]);
 
   const copyToClipboard = (code: string) => {
     navigator.clipboard.writeText(code);
@@ -48,7 +86,7 @@ const DealsPage: React.FC<DealsPageProps> = ({ wishlist, onToggleWishlist, onAdd
               <Flame className="w-4 h-4 fill-current" />
               Flash Sale Live
             </div>
-            <h1 className="text-6xl md:text-9xl font-black text-white mb-8 tracking-tighter uppercase italic leading-[0.9]">
+            <h1 className="text-5xl sm:text-6xl md:text-9xl font-black text-white mb-8 tracking-tighter uppercase italic leading-[0.9]">
               Elite <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-blue-500">Savings</span>
             </h1>
             <p className="text-gray-400 text-xl md:text-2xl max-w-3xl mb-16 font-medium leading-relaxed italic">
@@ -57,13 +95,14 @@ const DealsPage: React.FC<DealsPageProps> = ({ wishlist, onToggleWishlist, onAdd
 
             <div className="flex gap-6 md:gap-10">
               {[
+                { label: 'Days', val: timeLeft.d },
                 { label: 'Hours', val: timeLeft.h },
                 { label: 'Mins', val: timeLeft.m },
                 { label: 'Secs', val: timeLeft.s }
               ].map((t) => (
                 <div key={t.label} className="flex flex-col items-center">
-                  <div className="w-24 h-24 md:w-32 md:h-32 bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2.5rem] flex items-center justify-center mb-4 shadow-2xl">
-                    <span className="text-4xl md:text-5xl font-black text-white tracking-tighter">{String(t.val).padStart(2, '0')}</span>
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2rem] md:rounded-[2.5rem] flex items-center justify-center mb-4 shadow-2xl">
+                    <span className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tighter">{t.val}</span>
                   </div>
                   <span className="text-blue-500 text-[10px] font-black tracking-[0.3em] uppercase">{t.label}</span>
                 </div>
@@ -117,7 +156,7 @@ const DealsPage: React.FC<DealsPageProps> = ({ wishlist, onToggleWishlist, onAdd
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12">
             {dealProducts.map((product) => {
-              const discountPercent = Math.round(((product.originalPrice! - product.price) / product.originalPrice!) * 100);
+              const discountPercent = Math.round(((product.original_price! - product.price) / product.original_price!) * 100);
               
               return (
                 <div key={product.id} className="group flex flex-col animate-fadeInUp cursor-pointer">
@@ -136,7 +175,7 @@ const DealsPage: React.FC<DealsPageProps> = ({ wishlist, onToggleWishlist, onAdd
                         {discountPercent}% OFF
                       </div>
                       <div className="bg-slate-900/90 backdrop-blur-xl text-white text-[9px] font-black px-4 py-1.5 rounded-full uppercase tracking-[0.2em] flex items-center gap-2 border border-white/10">
-                        <Tag className="w-3 h-3 text-blue-400" /> Save ${(product.originalPrice! - product.price).toFixed(0)}
+                        <Tag className="w-3 h-3 text-blue-400" /> Save ${(product.original_price! - product.price).toFixed(0)}
                       </div>
                     </div>
 
@@ -171,7 +210,7 @@ const DealsPage: React.FC<DealsPageProps> = ({ wishlist, onToggleWishlist, onAdd
 
                   <div className="flex-1 space-y-4 px-3" onClick={() => onProductClick(product.id)}>
                     <div className="flex justify-between items-center">
-                      <span className="text-[10px] font-black text-blue-600 uppercase tracking-[0.2em]">{product.category}</span>
+                      <span className="text-[10px] font-black text-blue-600 uppercase tracking-[0.2em]">{product.category_id}</span>
                     </div>
                     <h3 className="font-black text-xl text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-1 italic leading-tight">
                       {product.name}
@@ -182,12 +221,12 @@ const DealsPage: React.FC<DealsPageProps> = ({ wishlist, onToggleWishlist, onAdd
                         <Star className="w-3.5 h-3.5 fill-current" />
                         <span className="ml-1.5 text-xs font-black text-slate-900">{product.rating}</span>
                       </div>
-                      <span className="text-gray-400 text-[10px] font-black uppercase tracking-widest">({product.reviews})</span>
+                      <span className="text-gray-400 text-[10px] font-black uppercase tracking-widest">({product.reviews_count})</span>
                     </div>
 
                     <div className="flex items-center gap-4">
                       <span className="text-3xl font-black text-blue-600 tracking-tighter italic">${product.price.toFixed(2)}</span>
-                      <span className="text-base text-gray-400 line-through font-bold decoration-red-500/30 decoration-2">${product.originalPrice?.toFixed(2)}</span>
+                      <span className="text-base text-gray-400 line-through font-bold decoration-red-500/30 decoration-2">${product.original_price?.toFixed(2)}</span>
                     </div>
 
                     <div className="space-y-3 pt-4">

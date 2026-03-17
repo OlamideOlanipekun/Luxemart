@@ -1,11 +1,32 @@
 
 import React from 'react';
+import { api } from '../services/api';
 
 interface NewsletterProps {
   onPrivacyClick: () => void;
 }
 
 const Newsletter: React.FC<NewsletterProps> = ({ onPrivacyClick }) => {
+  const [email, setEmail] = React.useState('');
+  const [status, setStatus] = React.useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [msg, setMsg] = React.useState('');
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !email.includes('@')) return;
+    
+    setStatus('loading');
+    try {
+      const data = await api.newsletter.subscribe(email);
+      setStatus('success');
+      setMsg(data.message || 'Subscription successful!');
+      setEmail('');
+    } catch (err: any) {
+      setStatus('error');
+      setMsg(err.message || 'Failed to subscribe.');
+    }
+  };
+
   return (
     <section className="py-24 bg-white">
       <div className="max-w-4xl mx-auto px-4 text-center space-y-8">
@@ -17,16 +38,29 @@ const Newsletter: React.FC<NewsletterProps> = ({ onPrivacyClick }) => {
           Join our email list to receive exclusive offers, new product announcements, and style tips directly to your inbox.
         </p>
         
-        <form className="flex flex-col sm:flex-row items-center gap-4 mt-8" onSubmit={(e) => e.preventDefault()}>
+        <form className="flex flex-col sm:flex-row items-center gap-4 mt-8" onSubmit={handleSubscribe}>
           <input
             type="email"
             placeholder="Enter your email address"
-            className="flex-1 w-full bg-gray-50 border border-gray-100 px-6 py-4 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-lg"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            disabled={status === 'loading'}
+            className="flex-1 w-full bg-gray-50 border border-gray-100 px-6 py-4 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-lg disabled:opacity-50"
           />
-          <button className="w-full sm:w-auto bg-blue-600 text-white px-10 py-4 rounded-2xl font-bold text-lg hover:bg-blue-700 transition-all shadow-xl shadow-blue-500/20 whitespace-nowrap">
-            Subscribe
+          <button 
+            type="submit"
+            disabled={status === 'loading'}
+            className="w-full sm:w-auto bg-blue-600 text-white px-10 py-4 rounded-2xl font-bold text-lg hover:bg-blue-700 transition-all shadow-xl shadow-blue-500/20 whitespace-nowrap flex items-center justify-center gap-2 disabled:opacity-50"
+          >
+            {status === 'loading' ? 'Processing...' : 'Subscribe'}
           </button>
         </form>
+
+        {status !== 'idle' && (
+          <p className={`text-sm font-bold ${status === 'success' ? 'text-green-600' : 'text-rose-600'} animate-in fade-in slide-in-from-top-2`}>
+            {msg}
+          </p>
+        )}
         
         <p className="text-xs text-gray-400">
           We care about your data. Read our <button onClick={onPrivacyClick} className="underline hover:text-blue-600 transition-colors">Privacy Policy</button>.

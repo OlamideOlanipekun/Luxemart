@@ -2,14 +2,15 @@
 export interface Product {
   id: string;
   name: string;
-  category: string;
+  category_id: string;
   price: number;
-  originalPrice?: number;
+  original_price?: number;
   rating: number;
-  reviews: number;
+  reviews_count: number;
   image: string;
   badge?: 'SALE' | 'NEW';
-  stockCount?: number;
+  stock_count?: number;
+  is_featured?: boolean;
 }
 
 export interface Category {

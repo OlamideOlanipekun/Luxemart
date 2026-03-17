@@ -54,7 +54,7 @@ const Assistant: React.FC = () => {
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="absolute bottom-20 right-0 w-[350px] md:w-[400px] h-[500px] bg-white rounded-[2rem] shadow-2xl border border-gray-100 flex flex-col overflow-hidden animate-fadeInUp">
+        <div className="absolute bottom-20 right-0 w-80 sm:w-[350px] md:w-[400px] h-[500px] bg-white rounded-[2rem] shadow-2xl border border-gray-100 flex flex-col overflow-hidden animate-fadeInUp">
           {/* Header */}
           <div className="bg-slate-900 p-6 flex items-center gap-3">
             <div className="bg-blue-600 p-2 rounded-xl">

@@ -1,10 +1,11 @@
 
 import React from 'react';
 import { ShoppingBag, Trash2, Plus, Minus, ArrowRight, ShieldCheck, Truck, RotateCcw, Sparkles } from 'lucide-react';
-import { ALL_PRODUCTS } from '../constants';
-import { CartItem } from '../types';
+import {  } from '../constants';
+import { CartItem, Product } from '../types';
 
 interface CartPageProps {
+  products: Product[];
   cart: CartItem[];
   onUpdateQuantity: (productId: string, quantity: number) => void;
   onRemove: (productId: string) => void;
@@ -13,9 +14,9 @@ interface CartPageProps {
   onAddToCart: (productId: string) => void;
 }
 
-const CartPage: React.FC<CartPageProps> = ({ cart, onUpdateQuantity, onRemove, onShopNow, onCheckout, onAddToCart }) => {
+const CartPage: React.FC<CartPageProps> = ({ products, cart, onUpdateQuantity, onRemove, onShopNow, onCheckout, onAddToCart }) => {
   const cartItems = cart.map(item => {
-    const product = ALL_PRODUCTS.find(p => p.id === item.productId);
+    const product = products.find(p => p.id === item.productId);
     return { ...product, ...item };
   }).filter(item => item.id);
 
@@ -24,9 +25,9 @@ const CartPage: React.FC<CartPageProps> = ({ cart, onUpdateQuantity, onRemove, o
   const tax = subtotal * 0.08; 
   const total = subtotal + shipping + tax;
 
-  const activeCategories = Array.from(new Set(cartItems.map(item => item.category)));
-  const recommendations = ALL_PRODUCTS
-    .filter(p => activeCategories.includes(p.category) && !cart.some(c => c.productId === p.id))
+  const activeCategories = Array.from(new Set(cartItems.map(item => item.category_id)));
+  const recommendations = products
+    .filter(p => activeCategories.includes(p.category_id) && !cart.some(c => c.productId === p.id))
     .slice(0, 4);
 
   if (cartItems.length === 0) {
@@ -80,13 +81,13 @@ const CartPage: React.FC<CartPageProps> = ({ cart, onUpdateQuantity, onRemove, o
             </div>
 
             {cartItems.map((item) => (
-              <div key={item.id} className="group relative flex flex-col md:grid md:grid-cols-6 items-center gap-8 p-6 md:p-8 bg-white rounded-[3.5rem] border border-gray-100 hover:border-blue-200 hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.05)] transition-all duration-700">
+              <div key={item.id} className="group relative flex flex-col md:grid md:grid-cols-6 items-center gap-6 md:gap-8 p-5 md:p-8 bg-white rounded-[2.5rem] md:rounded-[3.5rem] border border-gray-100 hover:border-blue-200 hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.05)] transition-all duration-700">
                 <div className="col-span-3 flex items-center gap-8 w-full">
                   <div className="w-32 h-44 bg-gray-50 rounded-[2.5rem] overflow-hidden shrink-0 shadow-lg border border-gray-100">
                     <img src={item.image} alt={item.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                   </div>
                   <div className="space-y-2">
-                    <span className="text-[10px] font-black text-blue-600 uppercase tracking-[0.3em] bg-blue-50 px-3 py-1 rounded-full">{item.category}</span>
+                    <span className="text-[10px] font-black text-blue-600 uppercase tracking-[0.3em] bg-blue-50 px-3 py-1 rounded-full">{item.category_id}</span>
                     <h3 className="font-black text-2xl text-slate-900 group-hover:text-blue-600 transition-colors italic leading-tight">{item.name}</h3>
                     <div className="flex items-center gap-6 pt-4">
                       <button 
@@ -134,7 +135,7 @@ const CartPage: React.FC<CartPageProps> = ({ cart, onUpdateQuantity, onRemove, o
           </div>
 
           <aside className="w-full lg:w-[400px] shrink-0">
-            <div className="bg-slate-900 rounded-[4rem] p-12 text-white shadow-3xl sticky top-32 border border-white/5 overflow-hidden group">
+            <div className="bg-slate-900 rounded-[3rem] lg:rounded-[4rem] p-8 md:p-12 text-white shadow-3xl sticky top-32 border border-white/5 overflow-hidden group">
               <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600 rounded-full blur-[120px] -z-10 opacity-20 transition-all group-hover:opacity-30"></div>
               
               <h2 className="text-3xl font-black italic tracking-tight mb-12 pb-8 border-b border-white/10 uppercase">
@@ -167,7 +168,7 @@ const CartPage: React.FC<CartPageProps> = ({ cart, onUpdateQuantity, onRemove, o
 
               <button 
                 onClick={onCheckout}
-                className="w-full bg-blue-600 text-white py-8 rounded-[2.5rem] font-black text-2xl hover:bg-blue-500 transition-all hover:scale-[1.02] shadow-[0_30px_60px_-15px_rgba(37,99,235,0.4)] active:scale-[0.98] flex items-center justify-center gap-4 uppercase tracking-widest italic"
+                className="w-full bg-blue-600 text-white py-6 md:py-8 rounded-[2rem] md:rounded-[2.5rem] font-black text-xl md:text-2xl hover:bg-blue-500 transition-all hover:scale-[1.02] shadow-[0_30px_60px_-15px_rgba(37,99,235,0.4)] active:scale-[0.98] flex items-center justify-center gap-4 uppercase tracking-widest italic"
               >
                 Seal Order <ArrowRight className="w-8 h-8" />
               </button>

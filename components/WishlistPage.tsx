@@ -1,9 +1,11 @@
 
 import React from 'react';
 import { Heart, ShoppingBag, ArrowRight, Star, Trash2, Plus } from 'lucide-react';
-import { ALL_PRODUCTS } from '../constants';
+import {  } from '../constants';
+import { Product } from '../types';
 
 interface WishlistPageProps {
+  products: Product[];
   wishlist: string[];
   onToggleWishlist: (id: string) => void;
   onAddToCart: (id: string) => void;
@@ -11,8 +13,8 @@ interface WishlistPageProps {
   onGoToCart: () => void;
 }
 
-const WishlistPage: React.FC<WishlistPageProps> = ({ wishlist, onToggleWishlist, onAddToCart, onShopNow, onGoToCart }) => {
-  const wishlistedProducts = ALL_PRODUCTS.filter(p => wishlist.includes(p.id));
+const WishlistPage: React.FC<WishlistPageProps> = ({ products, wishlist, onToggleWishlist, onAddToCart, onShopNow, onGoToCart }) => {
+  const wishlistedProducts = products.filter(p => wishlist.includes(p.id));
 
   return (
     <div className="bg-white min-h-screen pb-20">
@@ -93,12 +95,12 @@ const WishlistPage: React.FC<WishlistPageProps> = ({ wishlist, onToggleWishlist,
                       <Star className="w-3 h-3 fill-current" />
                       <span className="ml-1 text-xs font-black text-slate-900">{product.rating}</span>
                     </div>
-                    <span className="text-gray-400 text-[10px] font-bold uppercase tracking-widest">({product.reviews} reviews)</span>
+                    <span className="text-gray-400 text-[10px] font-bold uppercase tracking-widest">({product.reviews_count} reviews)</span>
                   </div>
                   <div className="flex items-baseline gap-2 pt-1">
                     <span className="text-2xl font-black text-blue-600">${product.price.toFixed(2)}</span>
-                    {product.originalPrice && (
-                      <span className="text-sm text-gray-400 line-through font-bold">${product.originalPrice.toFixed(2)}</span>
+                    {product.original_price && (
+                      <span className="text-sm text-gray-400 line-through font-bold">${product.original_price.toFixed(2)}</span>
                     )}
                   </div>
                 </div>
@@ -128,7 +130,7 @@ const WishlistPage: React.FC<WishlistPageProps> = ({ wishlist, onToggleWishlist,
       </section>
 
       {wishlistedProducts.length > 0 && (
-        <section className="bg-slate-900 py-32 mx-4 md:mx-12 rounded-[5rem] overflow-hidden relative">
+        <section className="bg-slate-900 py-16 md:py-32 mx-4 md:mx-12 rounded-[3rem] md:rounded-[5rem] overflow-hidden relative">
           <div className="absolute inset-0 grid-pattern opacity-5"></div>
           <div className="max-w-4xl mx-auto px-8 text-center relative z-10">
             <h2 className="text-4xl md:text-5xl font-black text-white mb-8 italic tracking-tighter">Secure Your <span className="text-blue-500">Selections</span></h2>

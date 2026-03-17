@@ -1,9 +1,12 @@
 
 import React from 'react';
 import { ArrowRight, Shirt, Watch, Smartphone, ShoppingBag } from 'lucide-react';
-import { CATEGORIES, ALL_PRODUCTS } from '../constants';
+import { Category } from '../types';
+import { Product } from '../types';
 
 interface CategoriesPageProps {
+  products: Product[];
+  categories: Category[];
   onCategorySelect: (catId: string) => void;
 }
 
@@ -14,7 +17,7 @@ const CategoryIconMap: Record<string, any> = {
   tech: Smartphone,
 };
 
-const CategoriesPage: React.FC<CategoriesPageProps> = ({ onCategorySelect }) => {
+const CategoriesPage: React.FC<CategoriesPageProps> = ({ products, categories, onCategorySelect }) => {
   return (
     <div className="bg-white min-h-screen pb-20">
       {/* Header Section */}
@@ -41,15 +44,15 @@ const CategoriesPage: React.FC<CategoriesPageProps> = ({ onCategorySelect }) => 
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-            {CATEGORIES.map((category, index) => {
+            {categories.map((category, index) => {
               const Icon = CategoryIconMap[category.id] || ShoppingBag;
-              const productCount = ALL_PRODUCTS.filter(p => p.category === category.id).length;
+              const productCount = products.filter(p => p.category_id === category.id).length;
 
               return (
                 <div 
                   key={category.id}
                   onClick={() => onCategorySelect(category.id)}
-                  className={`group relative h-[500px] rounded-[3rem] overflow-hidden cursor-pointer shadow-xl hover:shadow-2xl transition-all duration-700 animate-fadeInUp`}
+                  className={`group relative h-[360px] sm:h-[430px] md:h-[500px] rounded-[3rem] overflow-hidden cursor-pointer shadow-xl hover:shadow-2xl transition-all duration-700 animate-fadeInUp`}
                   style={{ animationDelay: `${0.1 * index}s` }}
                 >
                   <img 

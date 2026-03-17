@@ -1,9 +1,12 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { Star, Heart, ShoppingBag, ChevronDown, LayoutGrid, Eye, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
-import { ALL_PRODUCTS, CATEGORIES } from '../constants';
+import { Star, Heart, ShoppingBag, ChevronDown, LayoutGrid, Eye, Plus, ChevronLeft, ChevronRight, SlidersHorizontal, X } from 'lucide-react';
+import { Category } from '../types';
+import { Product } from '../types';
 
 interface ShopProps {
+  products: Product[];
+  categories: Category[];
   searchQuery: string;
   initialCategory?: string | null;
   wishlist: string[];
@@ -14,12 +17,13 @@ interface ShopProps {
 
 const PRODUCTS_PER_PAGE = 6;
 
-const Shop: React.FC<ShopProps> = ({ searchQuery, initialCategory, wishlist, onToggleWishlist, onAddToCart, onProductClick }) => {
+const Shop: React.FC<ShopProps> = ({ products, categories, searchQuery, initialCategory, wishlist, onToggleWishlist, onAddToCart, onProductClick }) => {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [priceRange, setPriceRange] = useState<number>(500);
   const [sortBy, setSortBy] = useState<'featured' | 'price-low' | 'price-high'>('featured');
   const [minRating, setMinRating] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
 
   useEffect(() => {
     if (initialCategory) {
@@ -34,9 +38,9 @@ const Shop: React.FC<ShopProps> = ({ searchQuery, initialCategory, wishlist, onT
   }, [searchQuery, selectedCategories, priceRange, sortBy, minRating]);
 
   const filteredProducts = useMemo(() => {
-    let result = ALL_PRODUCTS.filter(p => {
+    let result = products.filter(p => {
       const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(p.category);
+      const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(p.category_id);
       const matchesPrice = p.price <= priceRange;
       const matchesRating = p.rating >= minRating;
       return matchesSearch && matchesCategory && matchesPrice && matchesRating;
@@ -80,14 +84,28 @@ const Shop: React.FC<ShopProps> = ({ searchQuery, initialCategory, wishlist, onT
       </div>
 
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-16">
+        {/* Mobile filter toggle bar */}
+        <div className="lg:hidden flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
+          <span className="text-xs font-black text-gray-400 uppercase tracking-widest italic">
+            <span className="text-slate-900">{filteredProducts.length}</span> Items Found
+          </span>
+          <button
+            onClick={() => setIsMobileFiltersOpen(!isMobileFiltersOpen)}
+            className="flex items-center gap-2 px-5 py-3 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg active:scale-95 transition-all"
+          >
+            {isMobileFiltersOpen ? <X className="w-4 h-4" /> : <SlidersHorizontal className="w-4 h-4" />}
+            {isMobileFiltersOpen ? 'Close Filters' : 'Filters'}
+          </button>
+        </div>
+
         <div className="flex flex-col lg:flex-row gap-16">
-          <aside className="w-full lg:w-72 shrink-0 space-y-12">
+          <aside className={`w-full lg:w-72 shrink-0 space-y-12 lg:block ${isMobileFiltersOpen ? 'block' : 'hidden'}`}>
             <div>
-              <h3 className="font-black text-xl text-slate-900 mb-8 border-b border-gray-100 pb-4 italic uppercase">
-                Categories
-              </h3>
+                <h3 className="font-black text-xl text-slate-900 mb-6 border-b border-gray-100 pb-4 italic uppercase">
+                  Categories
+                </h3>
               <div className="space-y-4">
-                {CATEGORIES.map(cat => (
+                {categories.map(cat => (
                   <label key={cat.id} className="flex items-center gap-4 cursor-pointer group">
                     <div className={`w-6 h-6 rounded-lg border-2 transition-all flex items-center justify-center ${
                       selectedCategories.includes(cat.id) ? 'bg-blue-600 border-blue-600 shadow-lg shadow-blue-500/20' : 'border-gray-200 group-hover:border-blue-600'
@@ -230,12 +248,12 @@ const Shop: React.FC<ShopProps> = ({ searchQuery, initialCategory, wishlist, onT
                             <Star className="w-3.5 h-3.5 fill-current" />
                             <span className="ml-1.5 text-xs font-black text-slate-900">{product.rating}</span>
                           </div>
-                          <span className="text-gray-400 text-[10px] font-black uppercase tracking-[0.2em]">({product.reviews})</span>
+                          <span className="text-gray-400 text-[10px] font-black uppercase tracking-[0.2em]">({product.reviews_count})</span>
                         </div>
                         <div className="flex items-baseline gap-3 pt-1">
                           <span className="text-3xl font-black text-blue-600 tracking-tighter italic">${product.price.toFixed(2)}</span>
-                          {product.originalPrice && (
-                            <span className="text-base text-gray-300 line-through font-bold">${product.originalPrice.toFixed(2)}</span>
+                          {product.original_price && (
+                            <span className="text-base text-gray-300 line-through font-bold">${product.original_price.toFixed(2)}</span>
                           )}
                         </div>
                       </div>

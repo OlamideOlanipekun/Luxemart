@@ -1,27 +1,31 @@
 
 import { Search, User, Heart, ShoppingCart, Menu, ArrowRight, Tag, X } from 'lucide-react';
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { ALL_PRODUCTS, CATEGORIES } from '../constants';
-import { supabase } from '../supabaseClient';
+import { Category, Product } from '../types';
+import { getToken } from '../services/api';
 
 interface NavbarProps {
-  currentView: 'home' | 'shop' | 'categories' | 'deals' | 'about' | 'auth' | 'wishlist' | 'cart' | 'product-detail';
+  products: Product[];
+  currentView: 'home' | 'shop' | 'categories' | 'deals' | 'about' | 'auth' | 'wishlist' | 'cart' | 'product-detail' | 'profile' | 'admin';
   onNavigate: (view: any) => void;
   onCategorySelect?: (catId: string) => void;
   onProductSelect?: (productId: string) => void;
   searchQuery: string;
   onSearchChange: (query: string) => void;
+  categories: Category[];
   wishlistCount: number;
   cartCount: number;
 }
 
 const Navbar: React.FC<NavbarProps> = ({ 
+  products,
   currentView, 
   onNavigate, 
   onCategorySelect,
   onProductSelect,
   searchQuery, 
   onSearchChange, 
+  categories,
   wishlistCount, 
   cartCount 
 }) => {
@@ -33,16 +37,13 @@ const Navbar: React.FC<NavbarProps> = ({
   const [isCartAnimating, setIsCartAnimating] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setIsLoggedIn(!!session);
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setIsLoggedIn(!!session);
-    });
-
-    return () => subscription.unsubscribe();
+    setIsLoggedIn(!!getToken());
   }, []);
+
+  // Re-check login status whenever the view changes (e.g. after login/logout)
+  useEffect(() => {
+    setIsLoggedIn(!!getToken());
+  }, [currentView]);
 
   useEffect(() => {
     if (cartCount > 0) {
@@ -56,16 +57,16 @@ const Navbar: React.FC<NavbarProps> = ({
     if (!searchQuery.trim()) return { products: [], categories: [] };
     const query = searchQuery.toLowerCase();
 
-    const matchedProducts = ALL_PRODUCTS.filter(p => 
-      p.name.toLowerCase().includes(query) || p.category.toLowerCase().includes(query)
+    const matchedProducts = products.filter(p => 
+      p.name.toLowerCase().includes(query) || p.category_id.toLowerCase().includes(query)
     ).slice(0, 5);
 
-    const matchedCategories = CATEGORIES.filter(c => 
+    const matchedCategories = categories.filter(c => 
       c.name.toLowerCase().includes(query)
     ).slice(0, 3);
 
     return { products: matchedProducts, categories: matchedCategories };
-  }, [searchQuery]);
+  }, [searchQuery, products]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -224,8 +225,9 @@ const Navbar: React.FC<NavbarProps> = ({
             
             {/* User - Hidden on mobile, moved to menu bar */}
             <button 
-              onClick={() => onNavigate('auth')}
-              className={`p-2 rounded-full transition-colors relative hidden md:block ${currentView === 'auth' ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-100'}`}
+              onClick={() => onNavigate(isLoggedIn ? 'profile' : 'auth')}
+              className={`p-2 rounded-full transition-colors relative hidden md:block ${currentView === 'auth' || currentView === 'profile' ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-100'}`}
+              title={isLoggedIn ? 'My Account' : 'Sign In'}
             >
               <User className={`w-5 h-5 ${isLoggedIn ? 'text-blue-600' : ''}`} />
               {isLoggedIn && (
@@ -293,9 +295,9 @@ const Navbar: React.FC<NavbarProps> = ({
             <div className="space-y-2 mb-8 md:hidden">
               <div className="px-2 py-2 text-[10px] font-black text-gray-400 uppercase tracking-[0.3em]">Member Dashboard</div>
               <button
-                onClick={() => { onNavigate('auth'); setIsMobileMenuOpen(false); }}
+                onClick={() => { onNavigate(isLoggedIn ? 'profile' : 'auth'); setIsMobileMenuOpen(false); }}
                 className={`w-full flex items-center justify-between px-4 py-4 rounded-2xl transition-all ${
-                  currentView === 'auth' ? 'bg-blue-50 text-blue-600' : 'bg-gray-50 text-slate-900'
+                  currentView === 'auth' || currentView === 'profile' ? 'bg-blue-50 text-blue-600' : 'bg-gray-50 text-slate-900'
                 }`}
               >
                 <div className="flex items-center gap-3">

@@ -1,14 +1,17 @@
 
 import React from 'react';
 import { ArrowRight, Sparkles } from 'lucide-react';
-import { CATEGORIES } from '../constants';
+import { Category } from '../types';
 
 interface CategoriesProps {
+  categories: Category[];
   onCategoryClick?: (catId: string) => void;
   onViewAll?: () => void;
 }
 
-const Categories: React.FC<CategoriesProps> = ({ onCategoryClick, onViewAll }) => {
+const Categories: React.FC<CategoriesProps> = ({ categories, onCategoryClick, onViewAll }) => {
+  const displayCategories = categories && categories.length > 0 ? categories : [];
+
   return (
     <section className="py-24 md:py-32 bg-white overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 md:px-8">
@@ -37,11 +40,11 @@ const Categories: React.FC<CategoriesProps> = ({ onCategoryClick, onViewAll }) =
 
         {/* Enhanced Editorial Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-10">
-          {CATEGORIES.map((category, index) => (
+          {displayCategories.map((category, index) => (
             <div
               key={category.id}
               onClick={() => onCategoryClick?.(category.id)}
-              className="group relative h-[500px] rounded-[3.5rem] overflow-hidden cursor-pointer shadow-[0_20px_50px_rgba(0,0,0,0.1)] hover:shadow-[0_40px_80px_rgba(0,0,0,0.2)] transition-all duration-700 hover:-translate-y-4"
+              className="group relative h-[360px] sm:h-[430px] md:h-[500px] rounded-[3.5rem] overflow-hidden cursor-pointer shadow-[0_20px_50px_rgba(0,0,0,0.1)] hover:shadow-[0_40px_80px_rgba(0,0,0,0.2)] transition-all duration-700 hover:-translate-y-4"
             >
               {/* Background Image with Ken Burns Effect */}
               <img

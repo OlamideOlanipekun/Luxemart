@@ -1,10 +1,10 @@
 
 import React, { useState } from 'react';
 import { Mail, Lock, User, Eye, EyeOff, Github, Chrome, ArrowRight, Loader2, Sparkles, LogOut, CheckCircle2, AlertCircle, Info } from 'lucide-react';
-import { supabase } from '../supabaseClient';
+import { api, setToken } from '../services/api';
 
 interface AuthPageProps {
-  onAuthSuccess: () => void;
+  onAuthSuccess: (user: any) => void;
   onLogout?: () => void;
   currentUser?: any;
 }
@@ -27,53 +27,22 @@ const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess, onLogout, currentUse
 
     try {
       if (mode === 'register') {
-        const { error, data } = await supabase.auth.signUp({
-          email: form.email,
-          password: form.password,
-          options: {
-            data: {
-              full_name: form.name,
-            },
-          },
-        });
-
-        if (error) throw error;
-
-        // If session is null but no error, it usually means email confirmation is required
-        if (data.user && !data.session) {
-          setAuthError({ 
-            message: "Registration successful!", 
-            hint: "Please check your email to confirm your account before logging in. If you want to skip this, disable 'Confirm Email' in your Supabase Dashboard."
-          });
-          setIsLoading(false);
-          return;
-        }
-
-        onAuthSuccess();
+        const data = await api.auth.register(form.name, form.email, form.password);
+        setToken(data.token);
+        onAuthSuccess(data.user);
       } else if (mode === 'login') {
-        const { error } = await supabase.auth.signInWithPassword({
-          email: form.email,
-          password: form.password,
-        });
-        if (error) throw error;
-        onAuthSuccess();
+        const data = await api.auth.login(form.email, form.password);
+        setToken(data.token);
+        onAuthSuccess(data.user);
       } else {
-        const { error } = await supabase.auth.resetPasswordForEmail(form.email);
-        if (error) throw error;
+        // Forgot password — not yet implemented on backend, show message
         setAuthError({ 
-          message: "Check your email for the reset link.",
-          hint: "Be sure to check your spam folder if you don't see it within a few minutes."
+          message: 'Password reset is not yet available.',
+          hint: 'Please contact support or create a new account.'
         });
       }
     } catch (error: any) {
-      let message = error.message || "An unexpected authentication error occurred.";
-      let hint = undefined;
-
-      if (message.includes("confirmation email")) {
-        hint = "This is a common Supabase rate limit. Go to your Supabase Dashboard > Auth > Providers > Email and turn OFF 'Confirm email' to bypass this during development.";
-      }
-
-      setAuthError({ message, hint });
+      setAuthError({ message: error.message || 'An unexpected authentication error occurred.' });
     } finally {
       setIsLoading(false);
     }

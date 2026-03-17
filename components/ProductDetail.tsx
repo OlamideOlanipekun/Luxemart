@@ -1,11 +1,12 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { Star, Heart, ShoppingBag, ArrowLeft, Plus, Minus, Send, CheckCircle2, ShieldCheck, Truck, RotateCcw, Clock, Check, AlertCircle, Bell, Sparkles, Quote, Info, ExternalLink } from 'lucide-react';
-import { ALL_PRODUCTS } from '../constants';
-import { Review } from '../types';
+import {  } from '../constants';
+import { Review, Product } from '../types';
 import { getProductInsight, getReviewSummary } from '../services/geminiService';
 
 interface ProductDetailProps {
+  products: Product[];
   productId: string;
   wishlist: string[];
   onToggleWishlist: (id: string) => void;
@@ -13,7 +14,7 @@ interface ProductDetailProps {
   onBack: () => void;
 }
 
-const ProductDetail: React.FC<ProductDetailProps> = ({ productId, wishlist, onToggleWishlist, onAddToCart, onBack }) => {
+const ProductDetail: React.FC<ProductDetailProps> = ({ products, productId, wishlist, onToggleWishlist, onAddToCart, onBack }) => {
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<'details' | 'reviews'>('details');
   const [newReview, setNewReview] = useState({ rating: 5, comment: '' });
@@ -30,13 +31,13 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, wishlist, onTo
   const [aiReviewSummary, setAiReviewSummary] = useState<string | null>(null);
   const [isAiLoading, setIsAiLoading] = useState(false);
 
-  const product = useMemo(() => ALL_PRODUCTS.find(p => p.id === productId), [productId]);
+  const product = useMemo(() => products.find(p => p.id === productId), [productId, products]);
 
   // Fetch AI Insights
   useEffect(() => {
     if (product) {
       setIsAiLoading(true);
-      getProductInsight(product.name, product.category).then(insight => {
+      getProductInsight(product.name, product.category_id).then(insight => {
         setAiInsight(insight || null);
         setIsAiLoading(false);
       });
@@ -61,9 +62,9 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, wishlist, onTo
   const recentlyViewedProducts = useMemo(() => {
     return recentlyViewedIds
       .filter(id => id !== productId)
-      .map(id => ALL_PRODUCTS.find(p => p.id === id))
+      .map(id => products.find(p => p.id === id))
       .filter(Boolean);
-  }, [recentlyViewedIds, productId]);
+  }, [recentlyViewedIds, productId, products]);
 
   const initialReviews: Review[] = useMemo(() => [
     { id: 'r1', userName: 'Alexander V.', rating: 5, comment: 'Absolutely flawless design. The weight and texture of the material are exactly what you expect from LuxeMart.', date: '2024-03-10' },
@@ -124,7 +125,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, wishlist, onTo
   if (!product) return null;
 
   const isWishlisted = wishlist.includes(product.id);
-  const stockCount = product.stockCount ?? 0;
+  const stockCount = product.stock_count ?? 0;
   let stockStatus: 'in' | 'low' | 'out' = 'in';
   if (stockCount === 0) stockStatus = 'out';
   else if (stockCount <= 10) stockStatus = 'low';
@@ -202,7 +203,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, wishlist, onTo
               {/* Product Header */}
               <div className="space-y-4">
                 <div className="flex flex-wrap items-center gap-3">
-                  <span className="text-[10px] font-black text-blue-600 uppercase tracking-[0.3em] bg-blue-50 px-4 py-1.5 rounded-full border border-blue-100">{product.category}</span>
+                  <span className="text-[10px] font-black text-blue-600 uppercase tracking-[0.3em] bg-blue-50 px-4 py-1.5 rounded-full border border-blue-100">{product.category_id}</span>
                   {stockStatus === 'low' && (
                     <span className="flex items-center gap-1.5 px-3 py-1 bg-amber-50 text-amber-600 rounded-full text-[9px] font-black uppercase tracking-widest border border-amber-100 animate-pulse">
                       <AlertCircle className="w-3 h-3" /> Rare Item: {stockCount} Remaining
@@ -214,7 +215,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, wishlist, onTo
                     </span>
                   )}
                 </div>
-                <h1 className="text-5xl md:text-6xl font-black text-slate-900 leading-[0.9] italic tracking-tight">{product.name}</h1>
+              <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-slate-900 leading-[0.9] italic tracking-tight">{product.name}</h1>
                 <div className="flex items-center gap-4">
                   <div className="flex items-center text-yellow-500">
                     {[...Array(5)].map((_, i) => (
@@ -232,8 +233,8 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, wishlist, onTo
               {/* Pricing */}
               <div className="flex items-baseline gap-4 py-6 border-y border-gray-100">
                 <span className="text-6xl font-black text-blue-600 tracking-tighter italic">${product.price.toFixed(2)}</span>
-                {product.originalPrice && (
-                  <span className="text-2xl text-gray-300 line-through font-bold">${product.originalPrice.toFixed(2)}</span>
+                {product.original_price && (
+                  <span className="text-2xl text-gray-300 line-through font-bold">${product.original_price.toFixed(2)}</span>
                 )}
               </div>
 
@@ -311,7 +312,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, wishlist, onTo
                   </div>
 
                   {/* Actions */}
-                  <div className="flex flex-col sm:flex-row items-stretch gap-6 pt-6">
+                  <div className="flex flex-col xs:flex-row items-stretch gap-4 sm:gap-6 pt-6">
                     <div className="flex items-center bg-gray-50 p-2 rounded-2xl border border-gray-100">
                       <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="p-4 text-slate-400 hover:text-blue-600 hover:bg-white rounded-xl transition-all">
                         <Minus className="w-5 h-5" />
@@ -325,7 +326,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, wishlist, onTo
                     <button 
                       onClick={handleAddToCartClick}
                       disabled={isAdded}
-                      className={`flex-1 py-6 rounded-[2.5rem] font-black text-2xl transition-all duration-500 shadow-3xl flex items-center justify-center gap-4 uppercase tracking-widest italic overflow-hidden relative ${
+                      className={`flex-1 py-5 md:py-6 rounded-[2rem] md:rounded-[2.5rem] font-black text-xl md:text-2xl transition-all duration-500 shadow-3xl flex items-center justify-center gap-4 uppercase tracking-widest italic overflow-hidden relative ${
                         isAdded 
                         ? 'bg-green-600 text-white scale-[1.03]' 
                         : 'bg-slate-900 text-white hover:bg-blue-600 hover:scale-[1.02] active:scale-[0.98]'
@@ -422,7 +423,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, wishlist, onTo
           <div className="max-w-5xl mx-auto px-4">
             {activeTab === 'details' ? (
               <div className="animate-fadeInUp space-y-24">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-20">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-20">
                   <div className="space-y-8">
                     <h3 className="text-3xl font-black text-slate-900 italic uppercase tracking-tighter">Archival Narrative</h3>
                     <p className="text-gray-500 text-lg leading-relaxed font-medium">
@@ -469,11 +470,11 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, wishlist, onTo
             ) : (
               <div className="animate-fadeInUp space-y-20 pb-20">
                 {/* AI Review Summary Header */}
-                <div className="bg-slate-900 rounded-[3.5rem] p-10 md:p-16 text-white relative overflow-hidden group">
-                  <div className="absolute top-0 right-0 w-80 h-80 bg-blue-600 rounded-full blur-[100px] -z-10 opacity-20"></div>
-                  <div className="flex flex-col md:flex-row items-center gap-16">
+                  <div className="bg-slate-900 rounded-[2.5rem] md:rounded-[3.5rem] p-8 md:p-16 text-white relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-80 h-80 bg-blue-600 rounded-full blur-[100px] -z-10 opacity-20"></div>
+                    <div className="flex flex-col md:flex-row items-center gap-8 md:gap-16">
                     <div className="text-center md:text-left space-y-4">
-                      <div className="text-8xl font-black italic tracking-tighter text-blue-400">{product.rating}</div>
+                  <div className="text-7xl md:text-8xl font-black italic tracking-tighter text-blue-400">{product.rating}</div>
                       <div className="flex justify-center md:justify-start text-yellow-500">
                         {[...Array(5)].map((_, i) => (
                           <Star key={i} className={`w-5 h-5 ${i < Math.floor(product.rating) ? 'fill-current' : ''}`} />
@@ -503,12 +504,12 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, wishlist, onTo
                 </div>
 
                 {/* Review Form */}
-                <div className="bg-gray-50 rounded-[4rem] p-10 md:p-16 border border-gray-100">
+                  <div className="bg-gray-50 rounded-[2.5rem] md:rounded-[4rem] p-8 md:p-16 border border-gray-100">
                   <h3 className="text-3xl font-black text-slate-900 mb-8 italic uppercase tracking-tight">Add Your <span className="text-blue-600">Critique</span></h3>
                   <form onSubmit={handleReviewSubmit} className="space-y-10">
                     <div className="flex flex-col gap-4">
                       <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Rating Level</label>
-                      <div className="flex gap-4">
+                    <div className="flex flex-wrap gap-3">
                         {[1, 2, 3, 4, 5].map((star) => (
                           <button
                             key={star}
@@ -545,8 +546,8 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, wishlist, onTo
                 {/* Review List */}
                 <div className="space-y-12">
                   {allReviews.map((review) => (
-                    <div key={review.id} className="pb-12 border-b border-gray-50 flex flex-col md:flex-row gap-12 group">
-                      <div className="w-52 shrink-0 space-y-3">
+                    <div key={review.id} className="pb-12 border-b border-gray-50 flex flex-col md:flex-row gap-6 md:gap-12 group">
+                      <div className="w-full md:w-52 md:shrink-0 space-y-3">
                         <div className="flex text-yellow-500">
                           {[...Array(5)].map((_, i) => (
                             <Star key={i} className={`w-3.5 h-3.5 ${i < review.rating ? 'fill-current' : ''}`} />
@@ -612,7 +613,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, wishlist, onTo
                     </div>
                     <div className="px-4 space-y-3">
                       <div className="flex justify-between items-center">
-                        <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">{p.category}</span>
+                        <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">{p.category_id}</span>
                         <div className="flex items-center text-yellow-500">
                           <Star className="w-3 h-3 fill-current" />
                           <span className="ml-1 text-[10px] font-black text-slate-900">{p.rating}</span>

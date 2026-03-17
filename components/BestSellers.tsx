@@ -1,20 +1,32 @@
 
 import React from 'react';
 import { Star, Heart, ShoppingBag, Eye, Plus, ArrowRight, ChevronLeft, ChevronRight, Sparkles, Hash } from 'lucide-react';
-import { BEST_SELLERS } from '../constants';
+import {  } from '../constants';
+import { Product } from '../types';
 // @ts-ignore
 import { Swiper, SwiperSlide } from 'swiper/react';
 // @ts-ignore
 import { Navigation, Pagination, Autoplay, FreeMode } from 'swiper/modules';
 
 interface BestSellersProps {
+  products: Product[];
   wishlist: string[];
   onToggleWishlist: (id: string) => void;
   onAddToCart: (id: string) => void;
   onProductClick: (id: string) => void;
 }
 
-const BestSellers: React.FC<BestSellersProps> = ({ wishlist, onToggleWishlist, onAddToCart, onProductClick }) => {
+const BestSellers: React.FC<BestSellersProps> = ({ products, wishlist, onToggleWishlist, onAddToCart, onProductClick }) => {
+  const bestSellers = [...products]
+    .sort((a, b) => {
+      // Prioritize featured
+      if (a.is_featured && !b.is_featured) return -1;
+      if (!a.is_featured && b.is_featured) return 1;
+      // Then rating
+      return (b.rating || 0) - (a.rating || 0);
+    })
+    .slice(0, 4);
+
   return (
     <section className="py-32 md:py-48 bg-white overflow-hidden relative group/section">
       {/* Background Decor */}
@@ -32,7 +44,7 @@ const BestSellers: React.FC<BestSellersProps> = ({ wishlist, onToggleWishlist, o
               <Sparkles className="w-5 h-5 fill-current animate-pulse" />
               <span className="text-[10px] font-black uppercase tracking-[0.5em]">Global Drop Archives</span>
             </div>
-            <h2 className="text-6xl md:text-9xl font-black text-slate-900 tracking-tighter italic uppercase leading-[0.8] transition-all">
+            <h2 className="text-5xl sm:text-6xl md:text-9xl font-black text-slate-900 tracking-tighter italic uppercase leading-[0.8] transition-all">
               The <span className="text-blue-600">Series 04</span> <br/>Selection
             </h2>
             <div className="h-2 w-32 bg-blue-600 rounded-full mt-4"></div>
@@ -78,7 +90,7 @@ const BestSellers: React.FC<BestSellersProps> = ({ wishlist, onToggleWishlist, o
             }}
             className="!overflow-visible"
           >
-            {BEST_SELLERS.map((product, index) => (
+            {bestSellers.map((product, index) => (
               <SwiperSlide 
                 key={product.id} 
                 className={`pb-20 transition-all duration-700 ${index % 2 !== 0 ? 'md:translate-y-20' : ''}`}
@@ -133,7 +145,7 @@ const BestSellers: React.FC<BestSellersProps> = ({ wishlist, onToggleWishlist, o
                     <div className="absolute bottom-10 left-10 right-10 z-20">
                       <div className="bg-white/10 backdrop-blur-2xl border border-white/20 rounded-[2.5rem] p-8 space-y-4 translate-y-4 group-hover/card:translate-y-0 transition-transform duration-700">
                         <div className="flex justify-between items-center">
-                          <span className="text-[9px] font-black text-blue-400 uppercase tracking-[0.4em]">{product.category}</span>
+                          <span className="text-[9px] font-black text-blue-400 uppercase tracking-[0.4em]">{product.category_id}</span>
                           <div className="flex items-center gap-1.5 px-3 py-1 bg-white/10 rounded-full">
                             <Star className="w-3 h-3 text-yellow-400 fill-current" />
                             <span className="text-[10px] font-black text-white">{product.rating}</span>
@@ -147,8 +159,8 @@ const BestSellers: React.FC<BestSellersProps> = ({ wishlist, onToggleWishlist, o
                         <div className="flex items-center justify-between pt-2">
                            <div className="flex items-baseline gap-2">
                               <span className="text-3xl font-black text-white italic tracking-tighter">${product.price.toFixed(0)}</span>
-                              {product.originalPrice && (
-                                <span className="text-sm text-white/40 line-through font-bold">${product.originalPrice.toFixed(0)}</span>
+                              {product.original_price && (
+                                <span className="text-sm text-white/40 line-through font-bold">${product.original_price.toFixed(0)}</span>
                               )}
                            </div>
                            <button 

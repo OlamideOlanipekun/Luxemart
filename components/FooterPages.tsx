@@ -12,7 +12,7 @@ const PageHero: React.FC<{ title: string; subtitle: string; icon: any }> = ({ ti
         </div>
         <div className="h-1 w-20 bg-blue-600 rounded-full hidden md:block"></div>
       </div>
-      <h1 className="text-5xl md:text-8xl font-black text-slate-900 tracking-tighter italic uppercase leading-[0.9] mb-6">
+      <h1 className="text-4xl sm:text-5xl md:text-8xl font-black text-slate-900 tracking-tighter italic uppercase leading-[0.9] mb-6">
         {title.split(' ').map((word, i) => (
           <span key={i} className={i % 2 !== 0 ? 'text-blue-600' : ''}>{word} </span>
         ))}
@@ -193,8 +193,8 @@ export const SizeGuidePage: React.FC = () => (
         {['Men', 'Women'].map((gender) => (
           <div key={gender} className="space-y-12">
             <h2 className="text-4xl font-black text-slate-900 italic uppercase tracking-tighter">{gender}'s <span className="text-blue-600">Sizing</span></h2>
-            <div className="bg-white rounded-[3rem] border border-gray-100 overflow-hidden shadow-2xl">
-              <table className="w-full text-left">
+            <div className="bg-white rounded-[3rem] border border-gray-100 overflow-hidden shadow-2xl overflow-x-auto">
+              <table className="w-full min-w-[560px] text-left">
                 <thead className="bg-slate-900 text-white">
                   <tr>
                     {['Luxe Size', 'Standard (US)', 'Chest (in)', 'Waist (in)', 'Shoulder (in)'].map(h => (

@@ -25,21 +25,43 @@ import SocialFeed from './components/SocialFeed';
 import Preloader from './components/Preloader';
 import OrderSuccess from './components/OrderSuccess';
 import { ContactPage, ShippingPage, SizeGuidePage, LegalPage } from './components/FooterPages';
-import { ALL_PRODUCTS } from './constants';
-import { CartItem, Product } from './types';
+import AdminDashboard from './components/admin/AdminDashboard';
+import ProfilePage from './components/ProfilePage';
+import CheckoutPage from './components/CheckoutPage';
+import { CATEGORIES } from './constants';
+import { CartItem, Product, Category } from './types';
 import { CheckCircle2, X } from 'lucide-react';
-import { supabase } from './supabaseClient';
+import { api, getToken, removeToken } from './services/api';
+import { trackPageView } from './services/tracking';
 
-type AppView = 'home' | 'shop' | 'categories' | 'deals' | 'about' | 'auth' | 'wishlist' | 'cart' | 'product-detail' | 'contact' | 'shipping' | 'size-guide' | 'privacy' | 'terms' | 'order-success';
+type AppView = 'home' | 'shop' | 'categories' | 'deals' | 'about' | 'auth' | 'wishlist' | 'cart' | 'product-detail' | 'contact' | 'shipping' | 'size-guide' | 'privacy' | 'terms' | 'order-success' | 'admin' | 'profile' | 'checkout';
 
 const App: React.FC = () => {
+  // ─── Routing & State ────────────────────────────────────────────────
   const [isLoadingApp, setIsLoadingApp] = useState(true);
-  const [view, setView] = useState<AppView>('home');
-  const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
+  
+  // Parse initial view from URL
+  const getInitialView = (): { view: AppView; productId: string | null } => {
+    const path = window.location.pathname;
+    if (path === '/' || path === '/home') return { view: 'home', productId: null };
+    if (path.startsWith('/product/')) {
+      return { view: 'product-detail', productId: path.split('/').pop() || null };
+    }
+    const derivedView = path.slice(1) as AppView;
+    const validViews: AppView[] = ['home', 'shop', 'categories', 'deals', 'about', 'auth', 'wishlist', 'cart', 'product-detail', 'contact', 'shipping', 'size-guide', 'privacy', 'terms', 'order-success', 'admin', 'profile', 'checkout'];
+    return validViews.includes(derivedView) ? { view: derivedView, productId: null } : { view: 'home', productId: null };
+  };
+
+  const initialRoute = getInitialView();
+  const [view, setView] = useState<AppView>(initialRoute.view);
+  const [selectedProductId, setSelectedProductId] = useState<string | null>(initialRoute.productId);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategoryFilter, setActiveCategoryFilter] = useState<string | null>(null);
   const [notification, setNotification] = useState<{ show: boolean, product: Product | null }>({ show: false, product: null });
   const [lastOrderNumber, setLastOrderNumber] = useState('');
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoadingProducts, setIsLoadingProducts] = useState(true);
   const [user, setUser] = useState<any>(null);
   
   const [wishlist, setWishlist] = useState<string[]>(() => {
@@ -52,18 +74,85 @@ const App: React.FC = () => {
     return saved ? JSON.parse(saved) : [];
   });
 
-  // Supabase Auth Listener
+  // Fetch initial data
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-    });
+    const init = async () => {
+      try {
+        const token = getToken();
+        if (token) {
+          try {
+            const data = await api.auth.me();
+            setUser(data.user);
+          } catch (authErr) {
+            console.error("Auth validation failed, clearing token:", authErr);
+            removeToken();
+          }
+        }
+      } catch (err) {
+        console.error("Token read error:", err);
+      }
+      
+      try {
+        const [productsData, catsData] = await Promise.all([
+          api.products.getAll().catch(e => { console.error("Products error", e); return []; }),
+          api.categories.getAll().catch(e => { console.error("Categories error", e); return []; })
+        ]);
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
-
-    return () => subscription.unsubscribe();
+        console.log("Fetched products success:", productsData?.length);
+        setProducts(productsData || []);
+        setCategories(catsData || []);
+      } catch (err) {
+        console.error("Initialization error - FULL DETAIL:", err);
+      } finally {
+        setIsLoadingProducts(false);
+      }
+    };
+    init();
   }, []);
+
+  // Sync cart/wishlist from server when user logs in
+  useEffect(() => {
+    if (user) {
+      const syncData = async () => {
+        try {
+          const hasSynced = sessionStorage.getItem('luxemart_synced') === 'true';
+          const localCart = JSON.parse(localStorage.getItem('luxemart_cart') || '[]');
+          const localWishlist = JSON.parse(localStorage.getItem('luxemart_wishlist') || '[]');
+          
+          if (!hasSynced) {
+            // 1. Push any local cart items to the server
+            if (localCart.length > 0) {
+              await Promise.all(localCart.map((item: CartItem) => api.cart.add(item.productId, item.quantity).catch(() => {})));
+            }
+
+            // 2. Push any local wishlist items to the server
+            if (localWishlist.length > 0) {
+              await Promise.all(localWishlist.map((id: string) => api.wishlist.add(id).catch(() => {})));
+            }
+            
+            sessionStorage.setItem('luxemart_synced', 'true');
+          }
+
+          // 3. Fetch canonical merged data from server
+          const [serverCart, serverWishlist] = await Promise.all([
+            api.cart.get().catch(() => []),
+            api.wishlist.get().catch(() => [])
+          ]);
+
+          const mappedCart: CartItem[] = serverCart.map((i: any) => ({ productId: i.productId, quantity: i.quantity }));
+          setCart(mappedCart.length > 0 ? mappedCart : localCart);
+          
+          const mappedWishlist = serverWishlist.map((i: any) => i.productId);
+          setWishlist(mappedWishlist.length > 0 ? mappedWishlist : localWishlist);
+          
+        } catch (err) {
+          console.error("Sync error:", err);
+        }
+      };
+
+      syncData();
+    }
+  }, [user]);
 
   useEffect(() => {
     localStorage.setItem('luxemart_wishlist', JSON.stringify(wishlist));
@@ -74,15 +163,26 @@ const App: React.FC = () => {
   }, [cart]);
 
   const toggleWishlist = (productId: string) => {
+    const isInWishlist = wishlist.includes(productId);
+    
     setWishlist(prev => 
-      prev.includes(productId) 
+      isInWishlist
         ? prev.filter(id => id !== productId) 
         : [...prev, productId]
     );
+
+    // Sync to server if logged in
+    if (user) {
+      if (isInWishlist) {
+        api.wishlist.remove(productId).catch(() => {});
+      } else {
+        api.wishlist.add(productId).catch(() => {});
+      }
+    }
   };
 
   const handleAddToCart = (productId: string) => {
-    const product = ALL_PRODUCTS.find(p => p.id === productId);
+    const product = products.find(p => p.id === productId);
     setCart(prev => {
       const existing = prev.find(item => item.productId === productId);
       if (existing) {
@@ -94,6 +194,11 @@ const App: React.FC = () => {
       }
       return [...prev, { productId, quantity: 1 }];
     });
+
+    // Sync to server if logged in
+    if (user) {
+      api.cart.add(productId, 1).catch(() => {});
+    }
     
     if (product) {
       setNotification({ show: true, product });
@@ -109,33 +214,99 @@ const App: React.FC = () => {
     setCart(prev => prev.map(item => 
       item.productId === productId ? { ...item, quantity } : item
     ));
+
+    // Sync to server if logged in
+    if (user) {
+      api.cart.update(productId, quantity).catch(() => {});
+    }
   };
 
   const handleRemoveFromCart = (productId: string) => {
     setCart(prev => prev.filter(item => item.productId !== productId));
+
+    // Sync to server if logged in
+    if (user) {
+      api.cart.remove(productId).catch(() => {});
+    }
   };
 
-  const navigateTo = (newView: AppView) => {
+  const navigateTo = (newView: AppView, productId: string | null = null) => {
     setView(newView);
+    setSelectedProductId(productId);
+    
     if (newView !== 'shop' && newView !== 'product-detail') {
       setActiveCategoryFilter(null);
     }
+
+    // Update URL
+    const newPath = newView === 'product-detail' && productId 
+      ? `/product/${productId}` 
+      : `/${newView === 'home' ? '' : newView}`;
+    
+    if (window.location.pathname !== newPath) {
+      window.history.pushState({ view: newView, productId }, '', newPath);
+    }
+
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleProductSelect = (productId: string) => {
-    setSelectedProductId(productId);
-    setView('product-detail');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    navigateTo('product-detail', productId);
   };
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
+  const handleAuthSuccess = (userData: any) => {
+    setUser(userData);
+    navigateTo('home');
+  };
+
+  const handleLogout = () => {
+    removeToken();
+    setUser(null);
+    setCart([]);
+    setWishlist([]);
+    localStorage.removeItem('luxemart_cart');
+    localStorage.removeItem('luxemart_wishlist');
+    sessionStorage.removeItem('luxemart_synced');
     setView('home');
   };
 
   useEffect(() => {
     (window as any).handleProductSelect = handleProductSelect;
+  }, []);
+
+  useEffect(() => {
+    const handlePopState = (e: PopStateEvent) => {
+      const state = e.state;
+      if (state && state.view) {
+        setView(state.view);
+        setSelectedProductId(state.productId || null);
+      } else {
+        const route = getInitialView();
+        setView(route.view);
+        setSelectedProductId(route.productId);
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  useEffect(() => {
+    const path = view === 'product-detail' && selectedProductId 
+      ? `/product/${selectedProductId}` 
+      : `/${view === 'home' ? '' : view}`;
+    trackPageView(path);
+  }, [view, selectedProductId]);
+
+  // Secret Admin Shortcut (Ctrl + Alt + A)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.altKey && e.key.toLowerCase() === 'a') {
+        e.preventDefault();
+        navigateTo('admin');
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   const handleCategorySelect = (categoryId: string) => {
@@ -146,25 +317,37 @@ const App: React.FC = () => {
   };
 
   const handleCheckout = () => {
-    const orderNum = `LX-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
-    setLastOrderNumber(orderNum);
+    setView('checkout');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleOrderSuccess = (orderNumber: string) => {
+    setLastOrderNumber(orderNumber);
     setCart([]);
+    localStorage.setItem('luxemart_cart', '[]');
     setView('order-success');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const cartCount = cart.reduce((acc, item) => acc + item.quantity, 0);
 
+  // Admin dashboard – full-screen, bypasses main layout
+  if (view === 'admin') {
+    return <AdminDashboard user={user} onExit={() => navigateTo('home')} onAuthSuccess={handleAuthSuccess} />;
+  }
+
   return (
     <div className="min-h-screen flex flex-col overflow-x-hidden">
       {isLoadingApp && <Preloader onComplete={() => setIsLoadingApp(false)} />}
       
       <Navbar 
+        products={products}
         currentView={view as any} 
         onNavigate={navigateTo} 
         onCategorySelect={handleCategorySelect}
         onProductSelect={handleProductSelect}
         searchQuery={searchQuery}
+        categories={categories}
         wishlistCount={wishlist.length}
         cartCount={cartCount}
         onSearchChange={(q) => {
@@ -199,16 +382,24 @@ const App: React.FC = () => {
       </div>
 
       <main className="flex-grow">
-        {view === 'home' && (
+        {isLoadingProducts && (view as string) !== 'admin' && (
+          <div className="flex items-center justify-center py-40">
+            <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        )}
+        
+        {view === 'home' && !isLoadingProducts && (
           <>
             <Hero onShopNow={() => navigateTo('shop')} onViewCollections={() => navigateTo('categories')} />
             <FeaturesBar />
             <Categories 
+              categories={categories}
               onCategoryClick={handleCategorySelect} 
               onViewAll={() => navigateTo('categories')} 
             />
             <EditorialSection onExplore={() => navigateTo('shop')} />
             <BestSellers 
+              products={products}
               wishlist={wishlist} 
               onToggleWishlist={toggleWishlist} 
               onAddToCart={handleAddToCart}
@@ -222,8 +413,10 @@ const App: React.FC = () => {
           </>
         )}
         
-        {view === 'shop' && (
+        {view === 'shop' && !isLoadingProducts && (
           <Shop 
+            products={products}
+            categories={categories}
             searchQuery={searchQuery} 
             initialCategory={activeCategoryFilter} 
             wishlist={wishlist}
@@ -234,11 +427,12 @@ const App: React.FC = () => {
         )}
 
         {view === 'categories' && (
-          <CategoriesPage onCategorySelect={handleCategorySelect} />
+          <CategoriesPage products={products} categories={categories} onCategorySelect={handleCategorySelect} />
         )}
 
-        {view === 'deals' && (
+        {view === 'deals' && !isLoadingProducts && (
           <DealsPage 
+            products={products}
             wishlist={wishlist} 
             onToggleWishlist={toggleWishlist} 
             onAddToCart={handleAddToCart}
@@ -248,39 +442,58 @@ const App: React.FC = () => {
 
         {view === 'product-detail' && selectedProductId && (
           <ProductDetail 
+            products={products}
             productId={selectedProductId}
             wishlist={wishlist}
             onToggleWishlist={toggleWishlist}
             onAddToCart={handleAddToCart}
-            onBack={() => navigateTo('shop')}
+            onBack={() => setView('shop')}
           />
         )}
 
         {view === 'about' && <AboutPage onNavigate={navigateTo} />}
+        {view === 'profile' && (
+          <ProfilePage 
+            user={user}
+            onLogout={handleLogout}
+            onNavigate={navigateTo}
+          />
+        )}
         {view === 'auth' && (
           <AuthPage 
-            onAuthSuccess={() => navigateTo('home')} 
+            onAuthSuccess={handleAuthSuccess} 
             onLogout={handleLogout}
             currentUser={user}
           />
         )}
         {view === 'wishlist' && (
           <WishlistPage 
+            products={products}
             wishlist={wishlist} 
             onToggleWishlist={toggleWishlist} 
             onAddToCart={handleAddToCart}
-            onShopNow={() => navigateTo('shop')}
-            onGoToCart={() => navigateTo('cart')}
+            onShopNow={() => setView('shop')}
+            onGoToCart={() => setView('cart')}
           />
         )}
         {view === 'cart' && (
           <CartPage 
+            products={products}
             cart={cart}
             onUpdateQuantity={handleUpdateCartQuantity}
             onRemove={handleRemoveFromCart}
             onShopNow={() => navigateTo('shop')}
             onCheckout={handleCheckout}
             onAddToCart={handleAddToCart}
+          />
+        )}
+
+        {view === 'checkout' && (
+          <CheckoutPage 
+            products={products}
+            cart={cart}
+            onBack={() => setView('cart')}
+            onSuccess={handleOrderSuccess}
           />
         )}
 
@@ -301,6 +514,7 @@ const App: React.FC = () => {
       <Footer onNavigate={navigateTo} />
       <BackToTop />
       <Assistant />
+
     </div>
   );
 };

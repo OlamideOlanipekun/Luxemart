@@ -23,7 +23,7 @@ const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
           <div className="inline-block px-4 py-1 bg-blue-600/20 border border-blue-400/30 rounded-full text-blue-400 text-xs font-black uppercase tracking-[0.3em] mb-8 animate-fadeInUp">
             Our Legacy
           </div>
-          <h1 className="text-6xl md:text-9xl font-black text-white leading-[0.9] tracking-tighter mb-10 animate-fadeInUp italic">
+          <h1 className="text-5xl sm:text-6xl md:text-9xl font-black text-white leading-[0.9] tracking-tighter mb-10 animate-fadeInUp italic">
             DEFINING <br/>THE <span className="text-blue-500">ESSENTIAL</span>
           </h1>
           <p className="text-gray-300 text-xl md:text-2xl max-w-2xl font-medium leading-relaxed animate-fadeInUp [animation-delay:0.2s]">
@@ -51,7 +51,7 @@ const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
 
       {/* The Story Section */}
       <section className="py-32 max-w-7xl mx-auto px-4 md:px-8">
-        <div className="flex flex-col lg:flex-row items-center gap-24">
+        <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-24">
           <div className="flex-1 space-y-10">
             <h2 className="text-4xl md:text-6xl font-black text-slate-900 tracking-tight italic">
               A Vision of <span className="text-blue-600">Modernity</span>
@@ -78,7 +78,7 @@ const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
               <img src="https://images.unsplash.com/photo-1558769132-cb1aea458c5e?auto=format&fit=crop&q=80&w=600" className="rounded-[2.5rem] shadow-xl translate-y-12" alt="Process" />
               <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&q=80&w=600" className="rounded-[2.5rem] shadow-xl" alt="Retail" />
             </div>
-            <div className="absolute -bottom-8 -left-8 w-40 h-40 bg-blue-600 rounded-[2.5rem] flex flex-col items-center justify-center text-white p-6 shadow-2xl">
+            <div className="hidden md:flex absolute -bottom-8 -left-8 w-40 h-40 bg-blue-600 rounded-[2.5rem] flex-col items-center justify-center text-white p-6 shadow-2xl">
               <Award className="w-10 h-10 mb-2" />
               <span className="text-[10px] font-black uppercase text-center leading-tight">Best in Design 2023</span>
             </div>
@@ -126,7 +126,7 @@ const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
       {/* Philosophy Section */}
       <section className="py-32 relative overflow-hidden">
         <div className="absolute right-0 top-0 w-1/2 h-full bg-slate-900 -z-10 rounded-l-[10rem] hidden lg:block"></div>
-        <div className="max-w-7xl mx-auto px-4 md:px-8 flex flex-col lg:flex-row items-center gap-24">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 flex flex-col lg:flex-row items-center gap-12 lg:gap-24">
           <div className="flex-1">
              <img 
                src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=1200" 
@@ -162,7 +162,7 @@ const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
       <section className="bg-blue-600 py-32 mx-4 md:mx-12 rounded-[5rem] text-center text-white relative overflow-hidden">
         <div className="absolute inset-0 grid-pattern opacity-10"></div>
         <div className="relative z-10 max-w-4xl mx-auto px-8 space-y-10">
-          <h2 className="text-5xl md:text-8xl font-black italic tracking-tighter">Ready to <br/><span className="text-slate-900">Elevate?</span></h2>
+          <h2 className="text-4xl sm:text-5xl md:text-8xl font-black italic tracking-tighter">Ready to <br/><span className="text-slate-900">Elevate?</span></h2>
           <p className="text-blue-100 text-xl md:text-2xl font-medium max-w-2xl mx-auto leading-relaxed">
             Join 500,000+ members who prioritize quality above all else. Welcome to the future of retail.
           </p>
