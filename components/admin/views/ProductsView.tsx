@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useRef } from 'react';
 import { Search, Star, Edit2, Trash2, X, Upload } from 'lucide-react';
-import { api } from '../../../services/api';
+import { api, getImageUrl } from '../../../services/api';
 
 type StockStatus = 'In Stock' | 'Low Stock' | 'Out of Stock';
 
