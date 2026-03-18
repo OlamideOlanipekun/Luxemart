@@ -49,7 +49,7 @@ const BarChart: React.FC<BarChartProps> = ({ data, activeMetric }) => {
       {/* Bars */}
       {data.map((d, i) => {
         const value = d[activeMetric];
-        const bH = Math.max(4, (value / max) * chartH);
+        const bH = max > 0 ? Math.max(4, (value / max) * chartH) : 4;
         const x = padL + i * slotW + (slotW - barW) / 2;
         const y = padT + chartH - bH;
         const isHovered = hoveredIdx === i;
