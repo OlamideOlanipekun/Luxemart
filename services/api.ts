@@ -12,12 +12,22 @@ const API_BASE = (import.meta as any).env.VITE_API_URL || ''; // Use empty for r
  */
 export const getImageUrl = (url: string | null | undefined): string => {
   if (!url) return '';
-  if (url.startsWith('http') || url.startsWith('data:') || url.startsWith('blob:')) {
-    return url;
+  const cleaned = url.trim();
+  if (cleaned.startsWith('http') || cleaned.startsWith('data:') || cleaned.startsWith('blob:')) {
+    return cleaned;
   }
   
-  const backendRoot = API_BASE.replace(/\/api$/, '');
-  return `${backendRoot}${url.startsWith('/') ? '' : '/'}${url}`;
+  // Safe backend root resolution
+  const backendRoot = API_BASE ? API_BASE.replace(/\/api\/?$/, '') : '';
+  
+  if (backendRoot) {
+    // Ensure no double slashes or missing slashes
+    const root = backendRoot.endsWith('/') ? backendRoot.slice(0, -1) : backendRoot;
+    const path = cleaned.startsWith('/') ? cleaned : `/${cleaned}`;
+    return `${root}${path}`;
+  }
+  
+  return cleaned;
 };
 
 // ─── Token Management ───────────────────────────────────────────────
