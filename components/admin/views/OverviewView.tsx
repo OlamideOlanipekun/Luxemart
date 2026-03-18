@@ -10,7 +10,7 @@ import {
   MONTHLY_REVENUE, CATEGORY_STATS,
   REVENUE_SPARKLINE, ORDERS_SPARKLINE, CUSTOMERS_SPARKLINE, PRODUCTS_SPARKLINE,
 } from '../mockData';
-import { api } from '../../../services/api';
+import { api, getImageUrl } from '../../../services/api';
 
 const STATUS_MAP: Record<string, { label: string; cls: string }> = {
   delivered:  { label: 'Delivered',  cls: 'bg-emerald-50 text-emerald-600' },
@@ -198,7 +198,7 @@ const OverviewView: React.FC<{ onNavigate?: (view: string) => void }> = ({ onNav
                     className={`flex items-center gap-3 py-3 ${idx !== recentOrders.length - 1 ? 'border-b border-slate-50' : ''}`}
                   >
                     <img
-                      src={order.avatar}
+                      src={getImageUrl(order.avatar)}
                       alt={order.customer}
                       className="w-8 h-8 rounded-full object-cover flex-shrink-0"
                     />

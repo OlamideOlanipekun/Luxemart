@@ -2,7 +2,7 @@
 import { Search, User, Heart, ShoppingCart, Menu, ArrowRight, Tag, X } from 'lucide-react';
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Category, Product } from '../types';
-import { getToken } from '../services/api';
+import { getToken, getImageUrl } from '../services/api';
 
 interface NavbarProps {
   products: Product[];
@@ -165,7 +165,7 @@ const Navbar: React.FC<NavbarProps> = ({
                           className="w-full flex items-center gap-4 px-4 py-2.5 hover:bg-gray-50 rounded-2xl transition-all group text-left"
                         >
                           <div className="w-10 h-10 rounded-xl overflow-hidden bg-gray-100 shrink-0">
-                            <img src={prod.image} alt="" className="w-full h-full object-cover" />
+                            <img src={getImageUrl(prod.image)} alt="" className="w-full h-full object-cover" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="text-sm font-bold text-slate-900 truncate">{prod.name}</div>
@@ -411,7 +411,7 @@ const Navbar: React.FC<NavbarProps> = ({
                         className="w-full flex items-center gap-4 p-4 hover:bg-blue-50 rounded-2xl transition-all text-left"
                       >
                         <div className="w-14 h-14 rounded-xl overflow-hidden bg-gray-100 shrink-0">
-                          <img src={prod.image} alt="" className="w-full h-full object-cover" />
+                          <img src={getImageUrl(prod.image)} alt="" className="w-full h-full object-cover" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="font-black text-slate-900 text-base italic truncate">{prod.name}</div>

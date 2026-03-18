@@ -16,7 +16,7 @@ import {
   Clock,
   Upload
 } from 'lucide-react';
-import { api } from '../../../services/api';
+import { api, getImageUrl } from '../../../services/api';
 
 interface SettingsViewProps {
   user: any;
@@ -295,77 +295,46 @@ const SettingsView: React.FC<SettingsViewProps> = ({ user, onAuthSuccess }) => {
 
               <section>
                 <div className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-6">Visual Identity</div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 ml-1">Avatar Link / Upload</label>
-                  <div className="flex gap-2">
-                    <input 
-                      type="text" 
-                      value={profileForm.avatar}
-                      onChange={e => setProfileForm(p => ({ ...p, avatar: e.target.value }))}
-                      className="flex-1 bg-slate-50 border border-slate-100 rounded-2xl px-5 py-3.5 font-semibold focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-600/5 outline-none transition-all"
-                      placeholder="https://..."
-                    />
-                    <div className="relative">
-                      <input 
-                        type="file" 
-                        accept="image/*" 
-                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed" 
-                        disabled={isUploadingAvatar}
-                        onChange={handleAvatarUpload}
-                      />
-                      <button 
-                        type="button"
-                        disabled={isUploadingAvatar}
-                        className="h-full px-6 bg-slate-100 ring-1 ring-inset ring-slate-200 hover:bg-blue-50 text-slate-500 hover:text-blue-600 rounded-2xl flex flex-col items-center justify-center transition-colors disabled:opacity-50 gap-1 tracking-tight uppercase"
-                      >
-                        {isUploadingAvatar ? (
-                          <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                        ) : (
-                          <>
-                            <Upload className="w-4 h-4" />
-                            <span className="text-[10px] font-black">Upload</span>
-                          </>
-                        )}
-                      </button>
+                <div className="space-y-4">
+                  <label className="text-sm font-bold text-slate-700 ml-1">Current Preview</label>
+                  <div className="flex items-center gap-6">
+                    <div className="w-20 h-20 rounded-[2rem] overflow-hidden border-2 border-slate-100 shadow-sm">
+                      <img src={getImageUrl(profileForm.avatar)} alt="Avatar" className="w-full h-full object-cover" />
                     </div>
-                  </div>
-                </div>
-              </section>
-
-              <section>
-                <div className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-6">Visual Identity</div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 ml-1">Avatar Link / Upload</label>
-                  <div className="flex gap-2">
-                    <input 
-                      type="text" 
-                      value={profileForm.avatar}
-                      onChange={e => setProfileForm(p => ({ ...p, avatar: e.target.value }))}
-                      className="flex-1 bg-slate-50 border border-slate-100 rounded-2xl px-5 py-3.5 font-semibold focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-600/5 outline-none transition-all"
-                      placeholder="https://..."
-                    />
-                    <div className="relative">
-                      <input 
-                        type="file" 
-                        accept="image/*" 
-                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed" 
-                        disabled={isUploadingAvatar}
-                        onChange={handleAvatarUpload}
-                      />
-                      <button 
-                        type="button"
-                        disabled={isUploadingAvatar}
-                        className="h-full px-6 bg-slate-100 ring-1 ring-inset ring-slate-200 hover:bg-blue-50 text-slate-500 hover:text-blue-600 rounded-2xl flex flex-col items-center justify-center transition-colors disabled:opacity-50 gap-1 tracking-tight uppercase"
-                      >
-                        {isUploadingAvatar ? (
-                          <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                        ) : (
-                          <>
-                            <Upload className="w-4 h-4" />
-                            <span className="text-[10px] font-black">Upload</span>
-                          </>
-                        )}
-                      </button>
+                    <div className="flex-1 space-y-2">
+                       <label className="text-xs font-bold text-slate-500">Avatar Link / Upload</label>
+                       <div className="flex gap-2">
+                        <input 
+                          type="text" 
+                          value={profileForm.avatar}
+                          onChange={e => setProfileForm(p => ({ ...p, avatar: e.target.value }))}
+                          className="flex-1 bg-slate-50 border border-slate-100 rounded-2xl px-5 py-3.5 font-semibold focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-600/5 outline-none transition-all"
+                          placeholder="https://..."
+                        />
+                        <div className="relative">
+                          <input 
+                            type="file" 
+                            accept="image/*" 
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed" 
+                            disabled={isUploadingAvatar}
+                            onChange={handleAvatarUpload}
+                          />
+                          <button 
+                            type="button"
+                            disabled={isUploadingAvatar}
+                            className="h-full px-6 bg-slate-100 ring-1 ring-inset ring-slate-200 hover:bg-blue-50 text-slate-500 hover:text-blue-600 rounded-2xl flex flex-col items-center justify-center transition-colors disabled:opacity-50 gap-1 tracking-tight uppercase"
+                          >
+                            {isUploadingAvatar ? (
+                              <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                            ) : (
+                              <>
+                                <Upload className="w-4 h-4" />
+                                <span className="text-[10px] font-black">Upload</span>
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>

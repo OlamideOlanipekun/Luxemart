@@ -1,9 +1,7 @@
-
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Tag, Timer, Flame, Sparkles, Copy, Check, ShoppingBag, Heart, Star, Eye, Plus } from 'lucide-react';
-import {  } from '../constants';
 import { Product } from '../types';
-import { api } from '../services/api';
+import { api, getImageUrl } from '../services/api';
 
 interface DealsPageProps {
   products: Product[];
@@ -165,7 +163,7 @@ const DealsPage: React.FC<DealsPageProps> = ({ products, wishlist, onToggleWishl
                     onClick={() => onProductClick(product.id)}
                   >
                     <img
-                      src={product.image}
+                      src={getImageUrl(product.image)}
                       alt={product.name}
                       className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
                     />
@@ -226,7 +224,7 @@ const DealsPage: React.FC<DealsPageProps> = ({ products, wishlist, onToggleWishl
 
                     <div className="flex items-center gap-4">
                       <span className="text-3xl font-black text-blue-600 tracking-tighter italic">${product.price.toFixed(2)}</span>
-                      <span className="text-base text-gray-400 line-through font-bold decoration-red-500/30 decoration-2">${product.original_price?.toFixed(2)}</span>
+                      <span className="text-base text-gray-400 line-through font-bold">${product.original_price?.toFixed(2)}</span>
                     </div>
 
                     <div className="space-y-3 pt-4">

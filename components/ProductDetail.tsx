@@ -4,6 +4,7 @@ import { Star, Heart, ShoppingBag, ArrowLeft, Plus, Minus, Send, CheckCircle2, S
 import {  } from '../constants';
 import { Review, Product } from '../types';
 import { getProductInsight, getReviewSummary } from '../services/geminiService';
+import { getImageUrl } from '../services/api';
 
 interface ProductDetailProps {
   products: Product[];
@@ -177,7 +178,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ products, productId, wish
           <div className="flex-1 space-y-6">
             <div className="grid grid-cols-1 gap-6">
               <div className="relative aspect-[4/5] rounded-[3.5rem] overflow-hidden bg-gray-50 border border-gray-100 group shadow-lg">
-                <img src={product.image} alt={product.name} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
+                <img src={getImageUrl(product.image)} alt={product.name} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
                 {product.badge && (
                   <div className="absolute top-8 left-8 bg-slate-900/90 backdrop-blur-md text-white px-5 py-2 rounded-full text-[9px] font-black uppercase tracking-[0.2em] shadow-xl border border-white/10">
                     {product.badge} EDITION
@@ -187,7 +188,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ products, productId, wish
               <div className="grid grid-cols-2 gap-6">
                 {[product.image, product.image].map((img, i) => (
                   <div key={i} className="aspect-[4/5] rounded-[2.5rem] overflow-hidden bg-gray-50 border border-gray-100 shadow-sm group">
-                    <img src={img} alt="" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-500" />
+                    <img src={getImageUrl(img)} alt="" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-500" />
                   </div>
                 ))}
               </div>
@@ -607,7 +608,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ products, productId, wish
                     }}
                   >
                     <div className="relative aspect-[3/4] rounded-[3rem] overflow-hidden bg-gray-50 border border-gray-100 group-hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.15)] transition-all duration-700 group-hover:-translate-y-4">
-                      <img src={p.image} alt={p.name} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
+                      <img src={getImageUrl(p.image)} alt={p.name} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
                       <div className="absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/10 transition-colors"></div>
                       <div className="absolute inset-0 border-[12px] border-white/0 group-hover:border-white/10 transition-all duration-700 pointer-events-none rounded-[3rem]"></div>
                     </div>

@@ -2,6 +2,7 @@
 import React from 'react';
 import { ArrowRight, Sparkles } from 'lucide-react';
 import { Category } from '../types';
+import { getImageUrl } from '../services/api';
 
 interface CategoriesProps {
   categories: Category[];
@@ -48,7 +49,7 @@ const Categories: React.FC<CategoriesProps> = ({ categories, onCategoryClick, on
             >
               {/* Background Image with Ken Burns Effect */}
               <img
-                src={category.image}
+                src={getImageUrl(category.image)}
                 alt={category.name}
                 className="absolute inset-0 w-full h-full object-cover transition-transform duration-[2000ms] group-hover:scale-110 ease-out"
               />

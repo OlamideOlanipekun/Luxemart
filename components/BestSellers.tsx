@@ -3,6 +3,7 @@ import React from 'react';
 import { Star, Heart, ShoppingBag, Eye, Plus, ArrowRight, ChevronLeft, ChevronRight, Sparkles, Hash } from 'lucide-react';
 import {  } from '../constants';
 import { Product } from '../types';
+import { getImageUrl } from '../services/api';
 // @ts-ignore
 import { Swiper, SwiperSlide } from 'swiper/react';
 // @ts-ignore
@@ -107,7 +108,7 @@ const BestSellers: React.FC<BestSellersProps> = ({ products, wishlist, onToggleW
 
                     {/* Image Layer */}
                     <img
-                      src={product.image}
+                      src={getImageUrl(product.image)}
                       alt={product.name}
                       className="absolute inset-0 w-full h-full object-cover transition-transform duration-[1.5s] group-hover/card:scale-110 group-hover/card:rotate-1"
                     />

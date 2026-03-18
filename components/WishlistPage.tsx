@@ -3,6 +3,7 @@ import React from 'react';
 import { Heart, ShoppingBag, ArrowRight, Star, Trash2, Plus } from 'lucide-react';
 import {  } from '../constants';
 import { Product } from '../types';
+import { getImageUrl } from '../services/api';
 
 interface WishlistPageProps {
   products: Product[];
@@ -57,7 +58,7 @@ const WishlistPage: React.FC<WishlistPageProps> = ({ products, wishlist, onToggl
               <div key={product.id} className="group flex flex-col animate-fadeInUp">
                 <div className="relative aspect-[3/4] overflow-hidden rounded-[3rem] bg-gray-100 mb-6 shadow-md transition-all duration-500 group-hover:shadow-2xl">
                   <img
-                    src={product.image}
+                    src={getImageUrl(product.image)}
                     alt={product.name}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   />

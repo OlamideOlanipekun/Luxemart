@@ -250,7 +250,7 @@ const ProductsView: React.FC = () => {
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-xl overflow-hidden bg-slate-50 flex-shrink-0 border border-slate-100">
                             <img
-                              src={product.image}
+                              src={getImageUrl(product.image)}
                               alt={product.name}
                               className="w-full h-full object-cover"
                             />

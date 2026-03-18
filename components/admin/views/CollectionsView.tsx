@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { LayoutGrid, Save, Image as ImageIcon, Plus, Trash2, ExternalLink, Sparkles, Upload } from 'lucide-react';
-import { api } from '../../../services/api';
+import { api, getImageUrl } from '../../../services/api';
 import { Category } from '../../../types';
 
 const CollectionsView: React.FC = () => {
@@ -181,7 +181,7 @@ const CollectionsView: React.FC = () => {
             </div>
 
             <div className="relative aspect-[16/6] rounded-3xl overflow-hidden border border-slate-100 shadow-inner">
-               <img src={category.image} alt="" className="w-full h-full object-cover" />
+               <img src={getImageUrl(category.image)} alt="" className="w-full h-full object-cover" />
                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent flex items-end p-6">
                   <div className="text-white">
                     <div className="text-[8px] font-black uppercase tracking-widest opacity-60">Series Preview</div>

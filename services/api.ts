@@ -6,6 +6,19 @@
 import { Category } from '../types';
 
 const API_BASE = (import.meta as any).env.VITE_API_URL || ''; // Use empty for relative or full URL for production
+ 
+/**
+ * Resolves an image URL, prefixing it with the backend root if it is a relative path.
+ */
+export const getImageUrl = (url: string | null | undefined): string => {
+  if (!url) return '';
+  if (url.startsWith('http') || url.startsWith('data:') || url.startsWith('blob:')) {
+    return url;
+  }
+  
+  const backendRoot = API_BASE.replace(/\/api$/, '');
+  return `${backendRoot}${url.startsWith('/') ? '' : '/'}${url}`;
+};
 
 // ─── Token Management ───────────────────────────────────────────────
 

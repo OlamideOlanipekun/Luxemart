@@ -31,7 +31,7 @@ import CheckoutPage from './components/CheckoutPage';
 import { CATEGORIES } from './constants';
 import { CartItem, Product, Category } from './types';
 import { CheckCircle2, X } from 'lucide-react';
-import { api, getToken, removeToken } from './services/api';
+import { api, getToken, removeToken, getImageUrl } from './services/api';
 import { trackPageView } from './services/tracking';
 
 type AppView = 'home' | 'shop' | 'categories' | 'deals' | 'about' | 'auth' | 'wishlist' | 'cart' | 'product-detail' | 'contact' | 'shipping' | 'size-guide' | 'privacy' | 'terms' | 'order-success' | 'admin' | 'profile' | 'checkout';
@@ -362,7 +362,7 @@ const App: React.FC = () => {
         {notification.product && (
           <div className="bg-white rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15)] border border-gray-100 p-4 flex items-center gap-4 max-w-xs md:max-w-sm">
             <div className="w-16 h-16 bg-blue-50 rounded-2xl overflow-hidden shrink-0">
-              <img src={notification.product.image} alt="" className="w-full h-full object-cover" />
+              <img src={getImageUrl(notification.product.image)} alt="" className="w-full h-full object-cover" />
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-2 text-green-600 mb-1">

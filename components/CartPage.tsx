@@ -3,6 +3,7 @@ import React from 'react';
 import { ShoppingBag, Trash2, Plus, Minus, ArrowRight, ShieldCheck, Truck, RotateCcw, Sparkles } from 'lucide-react';
 import {  } from '../constants';
 import { CartItem, Product } from '../types';
+import { getImageUrl } from '../services/api';
 
 interface CartPageProps {
   products: Product[];
@@ -84,7 +85,7 @@ const CartPage: React.FC<CartPageProps> = ({ products, cart, onUpdateQuantity, o
               <div key={item.id} className="group relative flex flex-col md:grid md:grid-cols-6 items-center gap-6 md:gap-8 p-5 md:p-8 bg-white rounded-[2.5rem] md:rounded-[3.5rem] border border-gray-100 hover:border-blue-200 hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.05)] transition-all duration-700">
                 <div className="col-span-3 flex items-center gap-8 w-full">
                   <div className="w-32 h-44 bg-gray-50 rounded-[2.5rem] overflow-hidden shrink-0 shadow-lg border border-gray-100">
-                    <img src={item.image} alt={item.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                    <img src={getImageUrl(item.image)} alt={item.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                   </div>
                   <div className="space-y-2">
                     <span className="text-[10px] font-black text-blue-600 uppercase tracking-[0.3em] bg-blue-50 px-3 py-1 rounded-full">{item.category_id}</span>
@@ -199,7 +200,7 @@ const CartPage: React.FC<CartPageProps> = ({ products, cart, onUpdateQuantity, o
               {recommendations.map((product) => (
                 <div key={product.id} className="group relative flex flex-col bg-white p-6 rounded-[3rem] border border-gray-50 hover:border-blue-100 transition-all duration-500 hover:shadow-2xl">
                   <div className="aspect-[3/4] overflow-hidden rounded-[2rem] mb-6 shadow-sm">
-                    <img src={product.image} alt={product.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                    <img src={getImageUrl(product.image)} alt={product.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                   </div>
                   <h3 className="font-black text-lg text-slate-900 mb-2 line-clamp-1 italic">{product.name}</h3>
                   <div className="flex items-center justify-between mt-auto">

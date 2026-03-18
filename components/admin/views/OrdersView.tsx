@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Search, Filter, ChevronDown } from 'lucide-react';
-import { api } from '../../../services/api';
+import { api, getImageUrl } from '../../../services/api';
 
 const STATUS_MAP: Record<string, { label: string; dot: string; cls: string }> = {
   delivered:  { label: 'Delivered',  dot: '#10b981', cls: 'bg-emerald-50 text-emerald-600' },
@@ -156,7 +156,7 @@ const OrdersView: React.FC = () => {
                       <td className="px-4 py-3.5">
                         <div className="flex items-center gap-2.5">
                           <img
-                            src={order.avatar}
+                            src={getImageUrl(order.avatar)}
                             alt={order.customer}
                             className="w-7 h-7 rounded-full object-cover flex-shrink-0"
                           />
