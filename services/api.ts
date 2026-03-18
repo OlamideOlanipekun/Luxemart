@@ -216,7 +216,9 @@ export const api = {
       });
       if (!res.ok) {
         const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.error || 'Failed to upload image');
+        const errorMsg = errData.error || `Upload failed (${res.status})`;
+        console.error('Upload error details:', res.status, errData);
+        throw new Error(errorMsg);
       }
       return res.json() as Promise<{ url: string }>;
     },
