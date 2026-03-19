@@ -96,10 +96,10 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
         )}
       </div>
 
-      {/* Collapse Toggle */}
+      {/* Collapse Toggle - Hidden on Mobile */}
       <button
         onClick={onToggleCollapse}
-        className="absolute -right-3 top-16 w-6 h-6 rounded-full bg-slate-700 border border-slate-600 flex items-center justify-center hover:bg-slate-600 transition-colors z-10"
+        className="absolute -right-3 top-16 w-6 h-6 rounded-full bg-slate-700 border border-slate-600 hidden lg:flex items-center justify-center hover:bg-slate-600 transition-colors z-10"
         title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
       >
         {collapsed

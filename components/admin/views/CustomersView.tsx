@@ -121,8 +121,8 @@ const CustomersView: React.FC = () => {
           </div>
         </div>
 
-        {/* Table */}
-        <div className="overflow-x-auto">
+        {/* Table - Hidden on Mobile */}
+        <div className="hidden sm:block overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-slate-50">
@@ -195,6 +195,57 @@ const CustomersView: React.FC = () => {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Card List - Shown only on Mobile */}
+        <div className="block sm:hidden divide-y divide-slate-50">
+          {filtered.length === 0 ? (
+            <div className="text-center py-12 text-sm text-slate-400">No customers found</div>
+          ) : (
+            filtered.map((customer) => {
+              const s = STATUS_MAP[customer.status];
+              return (
+                <div key={customer.id} className="p-4 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={customer.avatar}
+                        alt={customer.name}
+                        className="w-10 h-10 rounded-full object-cover flex-shrink-0 border border-slate-100"
+                      />
+                      <div>
+                        <div className="font-bold text-slate-900 text-sm leading-tight">{customer.name}</div>
+                        <div className="flex items-center gap-1.5 text-[10px] text-slate-400 mt-0.5">
+                          <Mail className="w-2.5 h-2.5" />
+                          {customer.email}
+                        </div>
+                      </div>
+                    </div>
+                    <span className={`text-[9px] font-black px-2 py-0.5 rounded-full ${s.cls}`}>
+                      {s.label}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-2 bg-slate-50/50 rounded-xl p-3 border border-slate-100/50">
+                    <div>
+                      <div className="text-[9px] text-slate-400 font-bold uppercase tracking-widest mb-0.5">Orders</div>
+                      <div className="text-xs font-bold text-slate-700">{customer.orders}</div>
+                    </div>
+                    <div>
+                      <div className="text-[9px] text-slate-400 font-bold uppercase tracking-widest mb-0.5">Spent</div>
+                      <div className="text-xs font-black text-slate-900">
+                        ${Number(customer.spent).toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-[9px] text-slate-400 font-bold uppercase tracking-widest mb-0.5">Joined</div>
+                      <div className="text-[10px] text-slate-500 font-medium">{customer.joined}</div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          )}
         </div>
 
         <div className="px-4 py-3 border-t border-slate-50">

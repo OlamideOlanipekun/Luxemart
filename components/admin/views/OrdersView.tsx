@@ -119,8 +119,8 @@ const OrdersView: React.FC = () => {
           </div>
         </div>
 
-        {/* Table */}
-        <div className="overflow-x-auto">
+        {/* Table - Hidden on Mobile */}
+        <div className="hidden sm:block overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-slate-50">
@@ -204,6 +204,64 @@ const OrdersView: React.FC = () => {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Card List - Shown only on Mobile */}
+        <div className="block sm:hidden divide-y divide-slate-50">
+          {filtered.length === 0 ? (
+            <div className="text-center py-12 text-sm text-slate-400">No orders found</div>
+          ) : (
+            filtered.map((order) => {
+              const s = STATUS_MAP[order.status] || STATUS_MAP.pending;
+              return (
+                <div key={order.id} className="p-4 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-lg border border-blue-100">{order.id}</span>
+                    <span className="text-[10px] text-slate-400 font-medium">{order.date}</span>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <img
+                      src={getImageUrl(order.avatar)}
+                      alt={order.customer}
+                      className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="font-bold text-slate-800 text-sm">{order.customer}</div>
+                      <div className="text-[11px] text-slate-400 truncate">{order.email}</div>
+                    </div>
+                  </div>
+
+                  <div className="bg-slate-50 rounded-xl p-3 space-y-2 border border-slate-100/50">
+                    <div className="flex justify-between items-start gap-4">
+                      <span className="text-[11px] text-slate-500 font-medium line-clamp-1">{order.product}</span>
+                      <span className="text-[11px] text-slate-400 shrink-0">{order.items} items</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-black text-slate-900">${Number(order.amount).toFixed(2)}</span>
+                      <div className="relative inline-block">
+                        <select
+                          value={order.status}
+                          disabled={updatingId === order.id}
+                          onChange={(e) => handleStatusUpdate(order.id, e.target.value)}
+                          className={`appearance-none pl-6 pr-8 py-1 rounded-full text-[10px] font-bold border-none outline-none cursor-pointer transition-all ${s.cls} ${updatingId === order.id ? 'opacity-50' : ''}`}
+                        >
+                          {Object.entries(STATUS_MAP).map(([val, info]) => (
+                             <option key={val} value={val}>{info.label}</option>
+                          ))}
+                        </select>
+                        <span
+                          className="absolute left-2.5 top-1/2 -translate-y-1/2 w-1 h-1 rounded-full"
+                          style={{ backgroundColor: s.dot }}
+                        />
+                        <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 opacity-60" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          )}
         </div>
 
         {/* Footer */}

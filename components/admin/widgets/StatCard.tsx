@@ -23,21 +23,23 @@ const StatCard: React.FC<StatCardProps> = ({
   const isPositive = change >= 0;
 
   return (
-    <div className="bg-white rounded-2xl p-5 border border-slate-100 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] transition-all duration-200 group">
-      <div className="flex items-start justify-between mb-4">
+    <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-100 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] transition-all duration-200 group">
+      <div className="flex items-start justify-between mb-3 sm:mb-4">
         <div
-          className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+          className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center flex-shrink-0"
           style={{ background: iconBg }}
         >
           {icon}
         </div>
-        <SparklineChart data={sparkData} color={sparkColor} width={88} height={38} />
+        <div className="hidden xs:block">
+          <SparklineChart data={sparkData} color={sparkColor} width={window.innerWidth < 640 ? 60 : 88} height={38} />
+        </div>
       </div>
 
-      <div className="text-[1.6rem] font-black text-slate-900 tracking-tight leading-none mb-1">
+      <div className="text-xl sm:text-[1.6rem] font-black text-slate-900 tracking-tight leading-none mb-1">
         {value}
       </div>
-      <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">
+      <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2 sm:mb-3">
         {title}
       </div>
 

@@ -60,7 +60,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ activeView, onExit, onMobileS
       {/* Right side */}
       <div className="flex items-center gap-2">
         {/* Search */}
-        <div className="relative hidden md:block">
+        <div className="relative hidden lg:block">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
           <input
             type="text"

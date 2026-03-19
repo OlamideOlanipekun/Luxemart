@@ -120,7 +120,7 @@ const OverviewView: React.FC<{ onNavigate?: (view: string) => void }> = ({ onNav
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         {stats.map(s => (
           <StatCard key={s.title} {...s} />
         ))}

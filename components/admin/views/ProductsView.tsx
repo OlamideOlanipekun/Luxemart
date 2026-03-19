@@ -215,8 +215,8 @@ const ProductsView: React.FC = () => {
           </div>
         </div>
 
-        {/* Table */}
-        <div className="overflow-x-auto">
+        {/* Table - Hidden on Mobile */}
+        <div className="hidden sm:block overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-slate-50">
@@ -325,6 +325,83 @@ const ProductsView: React.FC = () => {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Card List - Shown only on Mobile */}
+        <div className="block sm:hidden divide-y divide-slate-50">
+          {filtered.length === 0 ? (
+            <div className="text-center py-12 text-sm text-slate-400">No products found</div>
+          ) : (
+            filtered.map((product) => {
+              const stockStatus = getStockStatus(product.stock_count);
+              return (
+                <div key={product.id} className="p-4 space-y-4">
+                  <div className="flex items-start gap-3">
+                    <div className="w-16 h-16 rounded-xl overflow-hidden bg-slate-50 border border-slate-100 shrink-0">
+                      <img src={getImageUrl(product.image)} alt={product.name} className="w-full h-full object-cover" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-wrap items-center gap-2 mb-1">
+                        <h3 className="font-bold text-slate-900 text-sm leading-tight">{product.name}</h3>
+                        {product.badge && (
+                          <span className={`text-[9px] font-black px-1.5 py-0.5 rounded ${BADGE_MAP[product.badge]}`}>
+                            {product.badge}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-3 text-[10px] text-slate-400 uppercase tracking-widest font-bold">
+                        <span>{product.category_id}</span>
+                        <span>ID: {product.id}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 pt-1">
+                    <div>
+                      <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Price</div>
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-sm font-black text-slate-900">${Number(product.price).toFixed(2)}</span>
+                        {product.original_price && (
+                          <span className="text-[10px] text-slate-400 line-through">${Number(product.original_price).toFixed(2)}</span>
+                        )}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Stock</div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-bold text-slate-700">{product.stock_count}</span>
+                        <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${STOCK_MAP[stockStatus]}`}>
+                          {stockStatus}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-2">
+                    <div className="flex items-center gap-1.5 bg-slate-50 px-2 py-1 rounded-lg">
+                      <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
+                      <span className="text-xs font-bold text-slate-700">{product.rating}</span>
+                      <span className="text-[10px] text-slate-400">({product.reviews_count})</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => openEdit(product)}
+                        className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 text-slate-600 font-bold text-[10px] uppercase tracking-widest border border-slate-100"
+                      >
+                        <Edit2 className="w-3 h-3" /> Edit
+                      </button>
+                      <button
+                        onClick={() => setDeleteConfirm(product.id)}
+                        className="p-1.5 rounded-xl bg-slate-50 text-red-500 border border-slate-100"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          )}
         </div>
 
         <div className="px-4 py-3 border-t border-slate-50">
