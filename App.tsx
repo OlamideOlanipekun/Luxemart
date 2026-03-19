@@ -256,7 +256,11 @@ const App: React.FC = () => {
 
   const handleAuthSuccess = (userData: any) => {
     setUser(userData);
-    navigateTo('home');
+    // Only redirect to home if we're on the main auth page.
+    // This allows admin login to stay on the admin view.
+    if (view === 'auth') {
+      navigateTo('home');
+    }
   };
 
   const handleLogout = () => {
