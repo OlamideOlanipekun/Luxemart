@@ -405,12 +405,12 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ products, productId, wish
 
         {/* DETAILS & REVIEWS TABS */}
         <div className="mt-32">
-          <div className="flex justify-center gap-12 border-b border-gray-100 mb-20 overflow-x-auto no-scrollbar">
+          <div className="flex justify-start md:justify-center gap-8 md:gap-12 border-b border-gray-100 mb-20 overflow-x-auto no-scrollbar px-5 md:px-0">
             {['details', 'reviews'].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab as any)}
-                className={`pb-8 text-[11px] font-black uppercase tracking-[0.4em] relative transition-all whitespace-nowrap ${
+                className={`pb-8 text-[11px] font-black uppercase tracking-widest md:tracking-[0.4em] relative transition-all whitespace-nowrap ${
                   activeTab === tab 
                   ? 'text-blue-600 after:content-[""] after:absolute after:bottom-0 after:left-0 after:w-full after:h-1.5 after:bg-blue-600 after:rounded-full' 
                   : 'text-gray-400 hover:text-slate-900'
