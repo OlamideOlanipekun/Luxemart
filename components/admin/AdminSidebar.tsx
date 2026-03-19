@@ -80,8 +80,8 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
       >
       {/* Logo */}
       <div
-        className="flex items-center gap-3 px-4 py-5 border-b overflow-hidden"
-        style={{ borderColor: 'rgba(255,255,255,0.06)', minHeight: '72px' }}
+        className="flex items-center gap-3 px-4 py-5 border-b overflow-hidden min-h-[64px] lg:min-h-[72px]"
+        style={{ borderColor: 'rgba(255,255,255,0.06)' }}
       >
         <div className="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center flex-shrink-0">
           <Sparkles className="w-4 h-4 text-white" />

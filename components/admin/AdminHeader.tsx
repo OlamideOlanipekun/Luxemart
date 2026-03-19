@@ -39,8 +39,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ activeView, onExit, onMobileS
 
   return (
     <header
-      className="flex items-center justify-between px-4 md:px-6 gap-4 flex-shrink-0 bg-white border-b border-slate-100"
-      style={{ height: '72px' }}
+      className="flex items-center justify-between px-4 md:px-6 gap-4 flex-shrink-0 bg-white border-b border-slate-100 h-16 lg:h-[72px]"
     >
       {/* Mobile menu button + Page Title */}
       <div className="flex items-center gap-3">
