@@ -24,7 +24,7 @@ const BADGE_MAP: Record<string, string> = {
 const CATEGORIES = ['All', 'men', 'women', 'accessories', 'tech'];
 
 const EMPTY_FORM = {
-  name: '', category_id: 'men', price: '', original_price: '', image: '', badge: '', stock_count: '0', is_featured: false,
+  name: '', category_id: 'men', price: '', original_price: '', image: '', images: [] as string[], badge: '', stock_count: '0', is_featured: false,
 };
 
 const ProductsView: React.FC = () => {
@@ -88,6 +88,7 @@ const ProductsView: React.FC = () => {
       price: String(product.price ?? ''),
       original_price: product.original_price ? String(product.original_price) : '',
       image: product.image || '',
+      images: Array.isArray(product.images) ? product.images : [],
       badge: product.badge || '',
       stock_count: String(product.stock_count ?? 0),
       is_featured: !!product.is_featured,
@@ -105,6 +106,7 @@ const ProductsView: React.FC = () => {
         price: Number(form.price),
         original_price: form.original_price ? Number(form.original_price) : null,
         image: form.image || null,
+        images: form.images.filter((url: string) => url.trim() !== ''),
         badge: form.badge || null,
         stock_count: Number(form.stock_count) || 0,
         is_featured: form.is_featured ? 1 : 0,
@@ -509,7 +511,7 @@ const ProductsView: React.FC = () => {
                 </button>
               </div>
               <div>
-                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1 block">Image URL / Upload</label>
+                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1 block">Primary Image URL / Upload</label>
                 <div className="flex gap-2">
                   <input
                     type="text"
@@ -539,6 +541,16 @@ const ProductsView: React.FC = () => {
                     )}
                   </button>
                 </div>
+              </div>
+              <div className="pt-2">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1 block">Secondary Images (One URL per line)</label>
+                <textarea
+                  value={form.images?.join('\n') || ''}
+                  onChange={e => setForm({ ...form, images: e.target.value.split('\n') })}
+                  rows={2}
+                  className="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 placeholder-slate-300"
+                  placeholder="https://example.com/image2.jpg&#10;https://example.com/image3.jpg"
+                />
               </div>
               <div className="flex justify-end gap-2 pt-2">
                 <button
