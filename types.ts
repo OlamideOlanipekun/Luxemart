@@ -8,6 +8,7 @@ export interface Product {
   rating: number;
   reviews_count: number;
   image: string;
+  images?: string[];
   badge?: 'SALE' | 'NEW';
   stock_count?: number;
   is_featured?: boolean;
