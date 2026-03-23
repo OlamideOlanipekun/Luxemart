@@ -40,6 +40,7 @@ const ProductsView: React.FC = () => {
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [activeSlot, setActiveSlot] = useState<number | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -106,7 +107,7 @@ const ProductsView: React.FC = () => {
         price: Number(form.price),
         original_price: form.original_price ? Number(form.original_price) : null,
         image: form.image || null,
-        images: form.images.filter((url: string) => url.trim() !== ''),
+        images: [form.images[0] || '', form.images[1] || '', form.images[2] || ''],
         badge: form.badge || null,
         stock_count: Number(form.stock_count) || 0,
         is_featured: form.is_featured ? 1 : 0,
@@ -137,22 +138,25 @@ const ProductsView: React.FC = () => {
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file || activeSlot === null) return;
 
     setUploadingImage(true);
     try {
       const { url } = await api.admin.uploadImage(file);
       setForm(prev => {
-        if (!prev.image) {
+        if (activeSlot === 0) {
           return { ...prev, image: url };
         } else {
-          return { ...prev, images: [...(prev.images || []), url] };
+          const newImages = [...(prev.images || [])];
+          newImages[activeSlot - 1] = url;
+          return { ...prev, images: newImages };
         }
       });
     } catch (err: any) {
       alert(err.message || 'Failed to upload image');
     } finally {
       setUploadingImage(false);
+      setActiveSlot(null);
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
@@ -518,101 +522,99 @@ const ProductsView: React.FC = () => {
               </div>
               <div className="pt-4 border-t border-slate-100">
                 <div className="flex items-center justify-between mb-4">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Product Images</label>
-                  <div className="flex items-center gap-2">
-                    <input 
-                      type="file" 
-                      accept="image/*" 
-                      className="hidden" 
-                      ref={fileInputRef} 
-                      onChange={handleImageUpload}
-                    />
-                    <button 
-                      type="button"
-                      onClick={() => fileInputRef.current?.click()}
-                      disabled={uploadingImage}
-                      className="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 text-[10px] font-bold uppercase tracking-widest rounded-lg flex items-center justify-center transition-colors disabled:opacity-50"
-                    >
-                      {uploadingImage ? 'Uploading...' : '+ Upload'}
-                    </button>
-                  </div>
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Product Images (Storefront Slots)</label>
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    className="hidden" 
+                    ref={fileInputRef} 
+                    onChange={handleImageUpload}
+                  />
                 </div>
 
-                <div className="grid grid-cols-4 gap-3">
-                  {/* Primary Image */}
-                  {form.image && (
-                    <div className="group relative aspect-square rounded-xl overflow-hidden bg-slate-50 border-2 border-blue-500">
-                      <img src={getImageUrl(form.image)} alt="Primary" className="w-full h-full object-cover" />
-                      <div className="absolute top-1 left-1 bg-blue-500 text-white text-[8px] font-black uppercase px-2 py-0.5 rounded">Primary</div>
-                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                        <button 
-                          type="button"
-                          onClick={() => {
-                            const newImages = [...(form.images || [])];
-                            const nextPrimary = newImages.shift() || '';
-                            setForm({ ...form, image: nextPrimary, images: newImages });
-                          }}
-                          className="p-1.5 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors shadow-sm"
-                          title="Remove Primary"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {[ 
+                    { id: 0, label: 'Hero / Primary', val: form.image },
+                    { id: 1, label: 'Detail 1', val: form.images[0] },
+                    { id: 2, label: 'Detail 2', val: form.images[1] },
+                    { id: 3, label: 'Lifestyle', val: form.images[2] }
+                  ].map(slot => (
+                    <div key={slot.id} className="group relative aspect-square rounded-xl overflow-hidden bg-slate-50 border-2 border-slate-200 hover:border-blue-400 transition-colors">
+                      <div className="absolute top-0 left-0 right-0 bg-slate-900/60 text-white text-[8px] font-black uppercase tracking-widest px-2 py-1 text-center z-10 backdrop-blur-sm">
+                        {slot.label}
                       </div>
-                    </div>
-                  )}
 
-                  {/* Secondary Images */}
-                  {(form.images || []).map((img, idx) => (
-                    <div key={idx} className="group relative aspect-square rounded-xl overflow-hidden bg-slate-50 border border-slate-200">
-                      <img src={getImageUrl(img)} alt={`Secondary ${idx}`} className="w-full h-full object-cover" />
-                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
-                        <button 
-                          type="button"
-                          onClick={() => {
-                            if (!form.image) {
-                              setForm({ ...form, image: img, images: form.images.filter((_, i) => i !== idx) });
-                            } else {
-                              const newImages = [...form.images];
-                              newImages[idx] = form.image;
-                              setForm({ ...form, image: img, images: newImages });
-                            }
-                          }}
-                          className="px-2 py-1 bg-blue-500 text-white text-[9px] font-bold uppercase rounded-lg hover:bg-blue-600 transition-colors shadow-sm"
-                        >
-                          Make Primary
-                        </button>
-                        <button 
-                          type="button"
-                          onClick={() => setForm({ ...form, images: form.images.filter((_, i) => i !== idx) })}
-                          className="p-1.5 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors shadow-sm"
-                          title="Remove"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
+                      {slot.val ? (
+                        <>
+                          <img src={getImageUrl(slot.val)} alt={slot.label} className="w-full h-full object-cover" />
+                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 z-20">
+                            <button 
+                              type="button"
+                              onClick={() => {
+                                setActiveSlot(slot.id);
+                                fileInputRef.current?.click();
+                              }}
+                              className="px-2 py-1 bg-white text-slate-900 text-[9px] font-bold uppercase rounded hover:bg-slate-200 transition-colors shadow-sm"
+                            >
+                              Replace
+                            </button>
+                            <button 
+                              type="button"
+                              onClick={() => {
+                                setForm(prev => {
+                                  if (slot.id === 0) return { ...prev, image: '' };
+                                  const newImages = [...(prev.images || [])];
+                                  newImages[slot.id - 1] = '';
+                                  return { ...prev, images: newImages };
+                                });
+                              }}
+                              className="p-1.5 bg-red-500 text-white rounded hover:bg-red-600 transition-colors shadow-sm"
+                              title="Remove"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center p-2 gap-2 text-center h-full pt-6">
+                          {uploadingImage && activeSlot === slot.id ? (
+                            <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setActiveSlot(slot.id);
+                                fileInputRef.current?.click();
+                              }}
+                              disabled={uploadingImage}
+                              className="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center hover:bg-blue-100 transition-colors"
+                            >
+                              <Upload className="w-4 h-4" />
+                            </button>
+                          )}
+                          <input
+                            type="text"
+                            placeholder="Or paste URL"
+                            className="w-full text-[9px] text-center border-b border-slate-200 bg-transparent outline-none text-slate-600 placeholder:text-slate-400 mt-1 focus:border-blue-400 py-1"
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                const val = e.currentTarget.value.trim();
+                                if (val) {
+                                  setForm(prev => {
+                                    if (slot.id === 0) return { ...prev, image: val };
+                                    const newImages = [...(prev.images || [])];
+                                    newImages[slot.id - 1] = val;
+                                    return { ...prev, images: newImages };
+                                  });
+                                }
+                              }
+                            }}
+                          />
+                        </div>
+                      )}
                     </div>
                   ))}
-                  
-                  {/* Empty state or Add URL */}
-                  <div className="aspect-square rounded-xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center p-2 text-center bg-slate-50/50 hover:bg-slate-50 transition-colors">
-                    <input
-                      type="text"
-                      placeholder="Paste URL..."
-                      className="w-full text-[10px] text-center border-none bg-transparent outline-none text-slate-600 placeholder:text-slate-400"
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
-                          const val = e.currentTarget.value.trim();
-                          if (val) {
-                            if (!form.image) setForm({ ...form, image: val });
-                            else setForm({ ...form, images: [...(form.images || []), val] });
-                            e.currentTarget.value = '';
-                          }
-                        }
-                      }}
-                    />
-                    <span className="text-[8px] text-slate-400 mt-1 uppercase tracking-widest font-bold">Press Enter</span>
-                  </div>
                 </div>
               </div>
               <div className="flex justify-end gap-2 pt-2">

@@ -178,7 +178,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ products, productId, wish
           <div className="flex-1 space-y-6">
             <div className="grid grid-cols-1 gap-6">
               <div className="relative aspect-[4/5] rounded-[3.5rem] overflow-hidden bg-gray-50 border border-gray-100 group shadow-lg">
-                <img src={getImageUrl(product.images?.[0] || product.image)} alt={product.name} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
+                <img src={getImageUrl(product.image)} alt={product.name} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
                 {product.badge && (
                   <div className="absolute top-8 left-8 bg-slate-900/90 backdrop-blur-md text-white px-5 py-2 rounded-full text-[9px] font-black uppercase tracking-[0.2em] shadow-xl border border-white/10">
                     {product.badge} EDITION
@@ -190,28 +190,28 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ products, productId, wish
               <div className="grid grid-cols-2 gap-6">
                 <div className="aspect-[4/5] rounded-[2.5rem] overflow-hidden bg-gray-50 border border-gray-100 shadow-sm group relative">
                   <img 
-                    src={getImageUrl(product.images?.[1] || product.image)} 
+                    src={getImageUrl(product.images?.[0] || product.image)} 
                     alt="Detail 1" 
-                    className={`w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-all duration-700 ${!product.images?.[1] ? 'scale-150 object-top' : ''}`} 
+                    className={`w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-all duration-700 ${!product.images?.[0] ? 'scale-150 object-top' : ''}`} 
                   />
-                  {!product.images?.[1] && <div className="absolute inset-0 bg-black/5 pointer-events-none"></div>}
+                  {!product.images?.[0] && <div className="absolute inset-0 bg-black/5 pointer-events-none"></div>}
                 </div>
                 <div className="aspect-[4/5] rounded-[2.5rem] overflow-hidden bg-gray-50 border border-gray-100 shadow-sm group relative">
                   <img 
-                    src={getImageUrl(product.images?.[2] || product.image)} 
+                    src={getImageUrl(product.images?.[1] || product.image)} 
                     alt="Detail 2" 
-                    className={`w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-all duration-700 ${!product.images?.[2] ? 'scale-125 object-bottom' : ''}`} 
+                    className={`w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-all duration-700 ${!product.images?.[1] ? 'scale-125 object-bottom' : ''}`} 
                   />
-                  {!product.images?.[2] && <div className="absolute inset-0 bg-black/5 pointer-events-none"></div>}
+                  {!product.images?.[1] && <div className="absolute inset-0 bg-black/5 pointer-events-none"></div>}
                 </div>
               </div>
               
               {/* Feature Image */}
               <div className="aspect-[16/9] rounded-[3rem] overflow-hidden bg-gray-100 border border-gray-100 shadow-md group">
                 <img 
-                  src={getImageUrl(product.images?.[3] || product.image)} 
+                  src={getImageUrl(product.images?.[2] || product.image)} 
                   alt="Lifestyle" 
-                  className={`w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700 ${!product.images?.[3] ? 'scale-[1.02] -translate-y-4' : ''}`} 
+                  className={`w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700 ${!product.images?.[2] ? 'scale-[1.02] -translate-y-4' : ''}`} 
                 />
               </div>
             </div>
