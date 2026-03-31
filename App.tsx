@@ -74,6 +74,21 @@ const App: React.FC = () => {
     return saved ? JSON.parse(saved) : [];
   });
 
+  const refreshStoreData = async () => {
+    try {
+      const [productsData, catsData] = await Promise.all([
+        api.products.getAll().catch(e => { console.error("Products error", e); return []; }),
+        api.categories.getAll().catch(e => { console.error("Categories error", e); return []; })
+      ]);
+
+      console.log("Fetched products success:", productsData?.length);
+      setProducts(productsData || []);
+      setCategories(catsData || []);
+    } catch (err) {
+      console.error("Fetch store data error:", err);
+    }
+  };
+
   // Fetch initial data
   useEffect(() => {
     const init = async () => {
@@ -92,20 +107,8 @@ const App: React.FC = () => {
         console.error("Token read error:", err);
       }
       
-      try {
-        const [productsData, catsData] = await Promise.all([
-          api.products.getAll().catch(e => { console.error("Products error", e); return []; }),
-          api.categories.getAll().catch(e => { console.error("Categories error", e); return []; })
-        ]);
-
-        console.log("Fetched products success:", productsData?.length);
-        setProducts(productsData || []);
-        setCategories(catsData || []);
-      } catch (err) {
-        console.error("Initialization error - FULL DETAIL:", err);
-      } finally {
-        setIsLoadingProducts(false);
-      }
+      await refreshStoreData();
+      setIsLoadingProducts(false);
     };
     init();
   }, []);
@@ -340,7 +343,7 @@ const App: React.FC = () => {
 
   // Admin dashboard – full-screen, bypasses main layout
   if (view === 'admin') {
-    return <AdminDashboard user={user} onExit={() => navigateTo('home')} onAuthSuccess={handleAuthSuccess} />;
+    return <AdminDashboard user={user} onExit={async () => { await refreshStoreData(); navigateTo('home'); }} onAuthSuccess={handleAuthSuccess} />;
   }
 
   return (
