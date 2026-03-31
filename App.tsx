@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import Categories from './components/Categories';
@@ -111,8 +111,10 @@ const App: React.FC = () => {
   }, []);
 
   // Sync cart/wishlist from server when user logs in
+  const hasSyncedRef = useRef(false);
   useEffect(() => {
-    if (user) {
+    if (user && !hasSyncedRef.current) {
+      hasSyncedRef.current = true;
       const syncData = async () => {
         try {
           const hasSynced = sessionStorage.getItem('luxemart_synced') === 'true';
@@ -120,9 +122,9 @@ const App: React.FC = () => {
           const localWishlist = JSON.parse(localStorage.getItem('luxemart_wishlist') || '[]');
           
           if (!hasSynced) {
-            // 1. Push any local cart items to the server
+            // 1. Push any local cart items to the server (use update to SET quantity, not add)
             if (localCart.length > 0) {
-              await Promise.all(localCart.map((item: CartItem) => api.cart.add(item.productId, item.quantity).catch(() => {})));
+              await Promise.all(localCart.map((item: CartItem) => api.cart.update(item.productId, item.quantity).catch(() => {})));
             }
 
             // 2. Push any local wishlist items to the server
@@ -268,6 +270,7 @@ const App: React.FC = () => {
     setUser(null);
     setCart([]);
     setWishlist([]);
+    hasSyncedRef.current = false;
     localStorage.removeItem('luxemart_cart');
     localStorage.removeItem('luxemart_wishlist');
     sessionStorage.removeItem('luxemart_synced');
